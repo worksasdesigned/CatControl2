@@ -1,0 +1,13 @@
+BACKGROUND IMAGE PLACEHOLDER
+
+Dieses Verzeichnis sollte eine Datei namens "background.png" enthalten.
+
+Empfohlene Spezifikationen:
+- Format: PNG oder JPG
+- Auflösung: Mindestens 1920x1080px
+- Dateigröße: Unter 2MB für bessere Performance
+- Motiv: Katzen-/Tierthema passend zur Anwendung
+
+Sie können jedes beliebige Hintergrundbild verwenden, das zu Ihrem CatControl-System passt.
+
+Nach der Installation können Benutzer auch eigene Hintergrundbilder in ihren Profilen hochladen.
