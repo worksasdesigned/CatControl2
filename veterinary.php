@@ -59,22 +59,30 @@ if (!function_exists('shorten_text')) {
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['save_vet'])) {
+        $visitDate = $_POST['visit_date'] ?? date('Y-m-d');
+        $nextVaccinationDate = $_POST['next_vaccination_date'] ?? null;
+        $nextDewormingInterval = $_POST['next_deworming_interval'] ?? null;
+        $nextTickProtectionInterval = $_POST['next_tick_protection_interval'] ?? null;
+        $nextVisitDate = $_POST['next_visit_date'] ?? null;
+        $costEurInput = $_POST['cost_eur'] ?? null;
+        $costEur = ($costEurInput === '' || $costEurInput === null) ? null : $costEurInput;
+
         $data = [
             'kitten_id' => $kittenId,
             'user_id' => $currentUser['id'],
-            'visit_date' => $_POST['visit_date'] ?? date('Y-m-d'),
+            'visit_date' => $visitDate,
             'veterinarian_name' => trim($_POST['veterinarian_name'] ?? ''),
             'diagnosis' => trim($_POST['diagnosis'] ?? ''),
             'vaccination' => trim($_POST['vaccination'] ?? ''),
-            'next_vaccination_date' => $_POST['next_vaccination_date'] ?: null,
+            'next_vaccination_date' => $nextVaccinationDate ?: null,
             'deworming' => isset($_POST['deworming']) ? 1 : 0,
             'deworming_medication' => trim($_POST['deworming_medication'] ?? ''),
-            'next_deworming_interval' => $_POST['next_deworming_interval'] ?: null,
+            'next_deworming_interval' => $nextDewormingInterval ?: null,
             'tick_protection' => isset($_POST['tick_protection']) ? 1 : 0,
             'tick_protection_medication' => trim($_POST['tick_protection_medication'] ?? ''),
-            'next_tick_protection_interval' => $_POST['next_tick_protection_interval'] ?: null,
-            'next_visit_date' => $_POST['next_visit_date'] ?: null,
-            'cost_eur' => $_POST['cost_eur'] !== '' ? $_POST['cost_eur'] : null,
+            'next_tick_protection_interval' => $nextTickProtectionInterval ?: null,
+            'next_visit_date' => $nextVisitDate ?: null,
+            'cost_eur' => $costEur,
         ];
 
         if (!empty($_POST['record_id'])) {
@@ -95,8 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['delete_vet'])) {
-        $rid = (int)$_POST['record_id'];
-        if ($kittenService->deleteVeterinaryRecord($rid, $kittenId)) {
+        $rid = (int)($_POST['record_id'] ?? 0);
+        if ($rid && $kittenService->deleteVeterinaryRecord($rid, $kittenId)) {
             $success = 'Eintrag wurde gelöscht.';
         } else {
             $error = 'Fehler beim Löschen.';

@@ -122,6 +122,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
     }
 }
 
+// Handle set profile image
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_profile_image'])) {
+    $imageId = (int)($_POST['image_id'] ?? 0);
+    if ($imageId) {
+        try {
+            $config = require 'config/database.php';
+            $pdo = new PDO(
+                "mysql:host={$config['host']};dbname={$config['database']};charset={$config['charset']}",
+                $config['username'],
+                $config['password'],
+                $config['options']
+            );
+            $stmt = $pdo->prepare("SELECT filename FROM kitten_images WHERE id = ? AND kitten_id = ?");
+            $stmt->execute([$imageId, $kitten_id]);
+            $image = $stmt->fetch();
+            if ($image) {
+                $result = $kittenService->updateProfileImage($kitten_id, $currentUser['id'], $image['filename']);
+                if ($result['success']) {
+                    $uploadMessage = '<div class="message success">Profilbild aktualisiert.</div>';
+                } else {
+                    $uploadMessage = '<div class="message error">' . htmlspecialchars($result['message']) . '</div>';
+                }
+            }
+        } catch (PDOException $e) {
+            $uploadMessage = '<div class="message error">Fehler beim Setzen des Profilbildes.</div>';
+        }
+    }
+}
+
 // Get all images for this kitten
 $images = [];
 try {
@@ -518,6 +547,14 @@ if (!empty($currentUser['custom_background'])) {
                                 <p><small>Hochgeladen: <?= date('d.m.Y H:i', strtotime($image['upload_date'])) ?></small></p>
                                 
                                 <div class="image-actions">
+                                    <form method="POST" style="display: inline;">
+                                        <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
+                                        <?php if (!empty($image['is_profile_image'])): ?>
+                                            <button type="button" class="btn" disabled>✅ Profilbild</button>
+                                        <?php else: ?>
+                                            <button type="submit" name="set_profile_image" class="btn">⭐ Als Profilbild setzen</button>
+                                        <?php endif; ?>
+                                    </form>
                                     <form method="POST" style="display: inline;" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Bild löschen möchten?')">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <button type="submit" name="delete_image" class="btn btn-danger">🗑️ Löschen</button>

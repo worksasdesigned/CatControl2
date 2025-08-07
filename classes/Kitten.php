@@ -118,18 +118,24 @@ class Kitten {
     
     public function getUserKittens($userId) {
         $sql = "SELECT k.*, 
-                       (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1) as profile_image
-                FROM kittens k 
-                WHERE k.owner_id = ? 
-                   OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?)
-                ORDER BY k.created_at DESC";
-        
-        return $this->db->fetchAll($sql, [$userId, $userId]);
-    }
+                       COALESCE(
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1),
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id ORDER BY upload_date DESC LIMIT 1)
+                        ) as profile_image
+                 FROM kittens k 
+                 WHERE k.owner_id = ? 
+                    OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?)
+                 ORDER BY k.created_at DESC";
+         
+         return $this->db->fetchAll($sql, [$userId, $userId]);
+     }
     
     public function getPublicKittens($limit = 20, $offset = 0) {
         $sql = "SELECT k.*, u.username as owner_username,
-                       (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1) as profile_image
+                       COALESCE(
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1),
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id ORDER BY upload_date DESC LIMIT 1)
+                        ) as profile_image
                 FROM kittens k 
                 JOIN users u ON k.owner_id = u.id
                 WHERE k.is_public = 1 
@@ -305,20 +311,23 @@ class Kitten {
     
     public function searchKittens($query, $isPublicOnly = false) {
         $sql = "SELECT k.*, u.username as owner_username,
-                       (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1) as profile_image
-                FROM kittens k 
-                JOIN users u ON k.owner_id = u.id
-                WHERE (k.name LIKE ? OR k.color LIKE ? OR k.mother LIKE ?)";
-        
-        if ($isPublicOnly) {
-            $sql .= " AND k.is_public = 1";
-        }
-        
-        $sql .= " ORDER BY k.name ASC";
-        
-        $searchTerm = "%$query%";
-        return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
-    }
+                       COALESCE(
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1),
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id ORDER BY upload_date DESC LIMIT 1)
+                        ) as profile_image
+                 FROM kittens k 
+                 JOIN users u ON k.owner_id = u.id
+                 WHERE (k.name LIKE ? OR k.color LIKE ? OR k.mother LIKE ?)";
+         
+         if ($isPublicOnly) {
+             $sql .= " AND k.is_public = 1";
+         }
+         
+         $sql .= " ORDER BY k.name ASC";
+         
+         $searchTerm = "%$query%";
+         return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
+     }
 
     // Feeding records API
     public function addFeedingRecord(array $feedingData) {
