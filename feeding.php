@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['save_feeding'])) {
         $feedingData = [
             'kitten_id' => $kittenId,
+            'user_id' => $currentUser['id'],
             'date_time' => $_POST['date_time'],
             'weight' => (int)$_POST['weight'],
             'food_amount' => (int)$_POST['food_amount'],
@@ -77,7 +78,7 @@ $showAll = isset($_GET['show_all']);
 $feedingRecords = $kittenService->getFeedingRecords($kittenId, $showAll ? 0 : 20);
 
 // Get user preferences for field visibility
-$fieldPreferences = $userService->getFieldPreferences($currentUser['id'], 'feeding');
+$fieldPreferences = $userService->getFieldPreferences($currentUser['id']);
 
 // Get custom background if set
 $backgroundImage = 'assets/images/background.png';

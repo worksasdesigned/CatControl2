@@ -319,4 +319,145 @@ class Kitten {
         $searchTerm = "%$query%";
         return $this->db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
     }
+
+    // Feeding records API
+    public function addFeedingRecord(array $feedingData) {
+        $requiredKeys = ['kitten_id', 'user_id', 'date_time'];
+        foreach ($requiredKeys as $key) {
+            if (!isset($feedingData[$key]) || $feedingData[$key] === '' || $feedingData[$key] === null) {
+                return false;
+            }
+        }
+
+        // Convert and map incoming fields to DB schema
+        $feedingDate = date('Y-m-d H:i:s', strtotime($feedingData['date_time']));
+        $weightGrams = isset($feedingData['weight']) && $feedingData['weight'] !== '' ? (int)$feedingData['weight'] : null;
+        $foodAmountGrams = isset($feedingData['food_amount']) && $feedingData['food_amount'] !== '' ? (int)$feedingData['food_amount'] : null;
+        $foodType = $this->mapFoodType($feedingData['food_type'] ?? null);
+        $heatingPadRefilled = isset($feedingData['heat_bottle_refilled']) ? (int)(bool)$feedingData['heat_bottle_refilled'] : 0;
+        $stoolType = $this->mapStoolType($feedingData['bowel_movement'] ?? null);
+        $stoolConsistency = $this->mapStoolConsistency($feedingData['stool_consistency'] ?? null);
+        $stoolColor = $this->mapStoolColor($feedingData['stool_color'] ?? null);
+        $stoolColorOther = $feedingData['stool_color_other'] ?? null;
+        $fitnessLevel = isset($feedingData['fitness_level']) && $feedingData['fitness_level'] !== '' ? (int)$feedingData['fitness_level'] : null;
+        $notes = isset($feedingData['notes']) ? trim($feedingData['notes']) : null;
+
+        $sql = "INSERT INTO feeding_records (
+                    kitten_id, user_id, feeding_date, weight_grams, food_amount_grams,
+                    food_type, heating_pad_refilled, stool_type, stool_consistency,
+                    stool_color, stool_color_other, fitness_level, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            $this->db->execute($sql, [
+                (int)$feedingData['kitten_id'],
+                (int)$feedingData['user_id'],
+                $feedingDate,
+                $weightGrams,
+                $foodAmountGrams,
+                $foodType,
+                $heatingPadRefilled,
+                $stoolType,
+                $stoolConsistency,
+                $stoolColor,
+                $stoolColorOther,
+                $fitnessLevel,
+                $notes
+            ]);
+            return true;
+        } catch (Exception $e) {
+            error_log('addFeedingRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+         public function getFeedingRecords(int $kittenId, int $limit = 20) {
+         $params = [$kittenId];
+         $limitSql = '';
+         if ($limit > 0) {
+             $limitSql = ' LIMIT ' . (int)$limit;
+         }
+
+         $sql = "SELECT 
+                     id,
+                     feeding_date AS date_time,
+                     weight_grams AS weight,
+                     food_amount_grams AS food_amount,
+                     food_type,
+                     fitness_level
+                 FROM feeding_records
+                 WHERE kitten_id = ?
+                 ORDER BY feeding_date DESC" . $limitSql;
+         
+         try {
+             return $this->db->fetchAll($sql, $params);
+         } catch (Exception $e) {
+             error_log('getFeedingRecords error: ' . $e->getMessage());
+             return [];
+         }
+     }
+
+    public function deleteFeedingRecord(int $feedingId, int $kittenId) {
+        try {
+            $rows = $this->db->execute(
+                "DELETE FROM feeding_records WHERE id = ? AND kitten_id = ?",
+                [$feedingId, $kittenId]
+            );
+            return $rows > 0;
+        } catch (Exception $e) {
+            error_log('deleteFeedingRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function mapFoodType($value) {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $map = [
+            'milk' => 'katzenmilch',
+            'mixed' => 'mischfutter',
+            'wet' => 'nassfutter',
+            'dry' => 'trockenfutter'
+        ];
+        return $map[$value] ?? null;
+    }
+
+    private function mapStoolType($value) {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $map = [
+            'urine' => 'urin',
+            'stool' => 'kot',
+            'both' => 'beides'
+        ];
+        return $map[$value] ?? null;
+    }
+
+    private function mapStoolConsistency($value) {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $map = [
+            'firm' => 'fest',
+            'liquid' => 'fluessig'
+        ];
+        return $map[$value] ?? null;
+    }
+
+    private function mapStoolColor($value) {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $map = [
+            'brown' => 'braun',
+            'black' => 'schwarz',
+            'orange' => 'orange',
+            'red' => 'rot',
+            'gray' => 'grau',
+            'other' => 'sonstiges'
+        ];
+        return $map[$value] ?? null;
+    }
 }
