@@ -302,13 +302,13 @@ if (!empty($currentUser['custom_background'])) {
             height: 25px;
             cursor: pointer;
             font-size: 12px;
-            display: flex;
+            display: none; /* hidden by default */
             align-items: center;
             justify-content: center;
         }
         
-        .hide-toggle:hover {
-            background: #ccc;
+        .visibility-mode .hide-toggle {
+            display: flex;
         }
         
         .form-group.hidden {
@@ -375,8 +375,55 @@ if (!empty($currentUser['custom_background'])) {
             justify-content: center;
             margin-top: 30px;
         }
-        
-        .records-table {
+
+         /* Visibility mode controls */
+         .visibility-controls {
+             display: none;
+             margin-bottom: 15px;
+             padding: 10px;
+             background: #fff8e1;
+             border: 1px solid #ffe0b2;
+             border-radius: 8px;
+         }
+         .visibility-mode .visibility-controls { display: block; }
+         .gear-toggle-btn {
+             background: linear-gradient(135deg, #ffa726, #fb8c00);
+             color: #fff;
+             border: none;
+             padding: 8px 12px;
+             border-radius: 6px;
+             cursor: pointer;
+             font-size: 14px;
+             display: inline-flex;
+             align-items: center;
+             gap: 6px;
+         }
+         .hidden-fields-list {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 8px;
+             margin-top: 10px;
+         }
+         .hidden-field-chip {
+             background: #ffe0b2;
+             border: 1px solid #ffcc80;
+             border-radius: 20px;
+             padding: 6px 10px;
+             display: inline-flex;
+             align-items: center;
+             gap: 8px;
+             font-size: 12px;
+         }
+         .chip-btn {
+             background: #ffb74d;
+             color: #fff;
+             border: none;
+             border-radius: 12px;
+             padding: 4px 8px;
+             cursor: pointer;
+             font-size: 12px;
+         }
+         .records-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
@@ -465,8 +512,15 @@ if (!empty($currentUser['custom_background'])) {
         <?php endif; ?>
         
         <!-- Feeding Form -->
-        <div class="form-container">
+        <div class="form-container" id="feedingFormContainer">
             <h2 class="section-title">Neue Fütterung erfassen</h2>
+            <div style="text-align:center; margin-bottom: 10px;">
+                <button type="button" class="gear-toggle-btn" onclick="toggleVisibilityMode()">⚙️ Felder ein-/ausblenden</button>
+            </div>
+            <div class="visibility-controls">
+                <div><strong>Ausblend-Modus aktiv.</strong> Klicke auf 👁️ bei Feldern, um sie auszublenden. Versteckte Felder können unten wieder eingeblendet werden:</div>
+                <div class="hidden-fields-list" id="hiddenFieldsList"></div>
+            </div>
             
             <form method="POST">
                 <div class="form-grid">
@@ -500,7 +554,7 @@ if (!empty($currentUser['custom_background'])) {
                         </div>
                     </div>
                     
-                    <div class="form-group <?= isset($fieldPreferences['heat_bottle']) && !$fieldPreferences['heat_bottle'] ? 'hidden' : '' ?>">
+                    <div class="form-group <?= isset($fieldPreferences['heat_bottle_refilled']) && !$fieldPreferences['heat_bottle_refilled'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
                         <div class="checkbox-group">
                             <input type="checkbox" id="heat_bottle_refilled" name="heat_bottle_refilled">
@@ -632,34 +686,75 @@ if (!empty($currentUser['custom_background'])) {
         
         function toggleField(button) {
             const formGroup = button.parentElement;
+            const input = formGroup.querySelector('input, select, textarea');
+            if (!input || !input.name) return;
+
+            const fieldName = input.name;
+            const willBeVisible = formGroup.classList.contains('hidden');
+
             formGroup.classList.toggle('hidden');
-            
-            // Save preference (you would implement this with AJAX)
-            const fieldName = formGroup.querySelector('input, select, textarea').name;
-            const isVisible = !formGroup.classList.contains('hidden');
-            
-            // Simple implementation - could be enhanced with AJAX
-            localStorage.setItem('field_' + fieldName, isVisible);
+            saveFieldPreference(fieldName, willBeVisible);
+            renderHiddenFieldsPanel();
         }
-        
+
+        function saveFieldPreference(fieldName, isVisible) {
+            fetch('ajax/update-field-preference.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field_name: fieldName, visible: !!isVisible })
+            }).catch(()=>{});
+        }
+
         function editRecord(recordId) {
             // Implement edit functionality
             alert('Edit functionality would be implemented here for record ' + recordId);
         }
-        
-        // Load field preferences from localStorage
-        document.addEventListener('DOMContentLoaded', function() {
-            const formGroups = document.querySelectorAll('.form-group');
-            formGroups.forEach(group => {
+
+        function toggleVisibilityMode() {
+            const container = document.getElementById('feedingFormContainer');
+            container.classList.toggle('visibility-mode');
+            renderHiddenFieldsPanel();
+        }
+
+        function renderHiddenFieldsPanel() {
+            const list = document.getElementById('hiddenFieldsList');
+            if (!list) return;
+            list.innerHTML = '';
+            const container = document.getElementById('feedingFormContainer');
+            const hiddenGroups = container.querySelectorAll('.form-group.hidden');
+            hiddenGroups.forEach(group => {
                 const input = group.querySelector('input, select, textarea');
-                if (input && input.name) {
-                    const isVisible = localStorage.getItem('field_' + input.name);
-                    if (isVisible === 'false') {
-                        group.classList.add('hidden');
-                    }
+                if (!input || !input.name) return;
+                const label = group.querySelector('label');
+                const labelText = label ? label.textContent.replace(':','').trim() : input.name;
+
+                const chip = document.createElement('div');
+                chip.className = 'hidden-field-chip';
+                chip.innerHTML = `<span>${labelText}</span>`;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'chip-btn';
+                btn.textContent = 'Einblenden';
+                btn.onclick = function() { showField(input.name); };
+                chip.appendChild(btn);
+                list.appendChild(chip);
+            });
+        }
+
+        function showField(fieldName) {
+            const container = document.getElementById('feedingFormContainer');
+            const groups = container.querySelectorAll('.form-group');
+            groups.forEach(group => {
+                const input = group.querySelector('input, select, textarea');
+                if (input && input.name === fieldName) {
+                    group.classList.remove('hidden');
                 }
             });
-        });
+            saveFieldPreference(fieldName, true);
+            renderHiddenFieldsPanel();
+        }
+
+        // Removed localStorage-based preference override; server preferences are applied on render.
     </script>
 </body>
 </html>
