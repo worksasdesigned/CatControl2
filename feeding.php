@@ -25,10 +25,14 @@ if (!$kittenId) {
     exit;
 }
 
-// Get kitten details
-$kitten = $kittenService->getKittenById($kittenId);
+// Check if user has access to this kitten
+if (!$kittenService->hasAccess($kittenId, $currentUser['id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
 
-if (!$kitten || !$kittenService->hasKittenAccess($currentUser['id'], $kittenId)) {
+$kitten = $kittenService->getKittenById($kittenId);
+if (!$kitten) {
     header('Location: dashboard.php');
     exit;
 }
