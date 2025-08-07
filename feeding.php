@@ -17,8 +17,8 @@ $currentUser = $userService->getCurrentUser();
 $error = '';
 $success = '';
 
-// Get kitten ID from URL
-$kittenId = isset($_GET['kitten_id']) ? (int)$_GET['kitten_id'] : 0;
+// Get kitten ID from URL (accept both kitten_id and cat_id for compatibility)
+$kittenId = isset($_GET['kitten_id']) ? (int)$_GET['kitten_id'] : (isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0);
 
 if (!$kittenId) {
     header('Location: dashboard.php');
