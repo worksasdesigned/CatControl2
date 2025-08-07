@@ -45,16 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'found_date' => $found_date ?: null,
                 'tasso_id' => $tasso_id,
                 'ear_tattoo' => $ear_tattoo,
-                'postal_code' => $postal_code,
-                'user_id' => $currentUser['id']
+                'postal_code' => $postal_code
             ];
             
-            if ($kittenService->createKitten($kittenData)) {
+            $result = $kittenService->createKitten($currentUser['id'], $kittenData);
+            if ($result['success']) {
                 $success = 'Kätzchen wurde erfolgreich angelegt!';
                 // Redirect to dashboard after 2 seconds
                 header("refresh:2;url=dashboard.php");
             } else {
-                $error = 'Fehler beim Anlegen des Kätzchens.';
+                $error = $result['message'] ?? 'Fehler beim Anlegen des Kätzchens.';
             }
         }
     }
