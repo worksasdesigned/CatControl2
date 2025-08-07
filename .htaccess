@@ -20,28 +20,6 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-# Protect config directory
-<DirectoryMatch "^.*/config/">
-    Order allow,deny
-    Deny from all
-</DirectoryMatch>
-
-# Protect classes directory from direct access
-<DirectoryMatch "^.*/classes/">
-    <FilesMatch "\.php$">
-        Order allow,deny
-        Deny from all
-    </FilesMatch>
-</DirectoryMatch>
-
-# Allow uploads directory but prevent script execution
-<DirectoryMatch "^.*/uploads/">
-    <FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
-        Order allow,deny
-        Deny from all
-    </FilesMatch>
-</DirectoryMatch>
-
 # Set proper MIME types for uploads
 <IfModule mod_mime.c>
     AddType image/jpeg .jpg .jpeg
@@ -82,10 +60,6 @@ Options -Indexes
     php_value error_log /var/log/apache2/catcontrol_php_error.log
     php_flag expose_php Off
 </IfModule>
-
-# Redirect to HTTPS (uncomment when SSL is configured)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Custom Error Pages
 ErrorDocument 404 /error.php?code=404
