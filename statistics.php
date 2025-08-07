@@ -27,7 +27,7 @@ if (!$kittenService->hasAccess($kitten_id, $currentUser['id'])) {
     exit;
 }
 
-$kitten = $kittenService->getKitten($kitten_id);
+$kitten = $kittenService->getKittenById($kitten_id);
 if (!$kitten) {
     header('Location: dashboard.php');
     exit;
