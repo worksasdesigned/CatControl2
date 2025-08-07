@@ -29,59 +29,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (empty($message)) {
             $error = 'Nachricht ist erforderlich.';
         } else {
-            if ($messageService->sendMessage($currentUser['id'], $recipientId, $subject, $message)) {
-                $success = 'Nachricht wurde erfolgreich gesendet!';
+            $result = $messageService->sendMessage($currentUser['id'], $recipientId, $subject, $message);
+            if (!empty($result['success'])) {
+                $success = $result['message'] ?? 'Nachricht wurde erfolgreich gesendet!';
             } else {
-                $error = 'Fehler beim Senden der Nachricht.';
+                $error = $result['message'] ?? 'Fehler beim Senden der Nachricht.';
             }
         }
     }
     
-    if (isset($_POST['reply_message'])) {
+    if (isset($_POST['reply_message_submit'])) {
         $originalMessageId = (int)$_POST['original_message_id'];
         $replyMessage = trim($_POST['reply_message']);
         
         if (empty($replyMessage)) {
             $error = 'Antwort ist erforderlich.';
         } else {
-            if ($messageService->replyToMessage($currentUser['id'], $originalMessageId, $replyMessage)) {
-                $success = 'Antwort wurde erfolgreich gesendet!';
+            $result = $messageService->replyToMessage($originalMessageId, $currentUser['id'], $replyMessage);
+            if (!empty($result['success'])) {
+                $success = $result['message'] ?? 'Antwort wurde erfolgreich gesendet!';
             } else {
-                $error = 'Fehler beim Senden der Antwort.';
+                $error = $result['message'] ?? 'Fehler beim Senden der Antwort.';
             }
         }
     }
     
     if (isset($_POST['delete_message'])) {
         $messageId = (int)$_POST['message_id'];
-        if ($messageService->deleteMessage($messageId, $currentUser['id'])) {
-            $success = 'Nachricht wurde gelöscht.';
+        $result = $messageService->deleteMessage($messageId, $currentUser['id']);
+        if (!empty($result['success'])) {
+            $success = $result['message'] ?? 'Nachricht wurde gelöscht.';
         } else {
-            $error = 'Fehler beim Löschen der Nachricht.';
+            $error = $result['message'] ?? 'Fehler beim Löschen der Nachricht.';
         }
     }
     
     if (isset($_POST['block_user'])) {
         $blockUserId = (int)$_POST['block_user_id'];
-        if ($messageService->blockUser($currentUser['id'], $blockUserId)) {
-            $success = 'Benutzer wurde blockiert.';
+        $result = $userService->blockUser($currentUser['id'], $blockUserId);
+        if (!empty($result['success'])) {
+            $success = $result['message'] ?? 'Benutzer wurde blockiert.';
         } else {
-            $error = 'Fehler beim Blockieren des Benutzers.';
+            $error = $result['message'] ?? 'Fehler beim Blockieren des Benutzers.';
         }
     }
     
     if (isset($_POST['unblock_user'])) {
         $unblockUserId = (int)$_POST['unblock_user_id'];
-        if ($messageService->unblockUser($currentUser['id'], $unblockUserId)) {
-            $success = 'Benutzer wurde entsperrt.';
+        $result = $userService->unblockUser($currentUser['id'], $unblockUserId);
+        if (!empty($result['success'])) {
+            $success = $result['message'] ?? 'Benutzer wurde entsperrt.';
         } else {
-            $error = 'Fehler beim Entsperren des Benutzers.';
+            $error = $result['message'] ?? 'Fehler beim Entsperren des Benutzers.';
         }
     }
     
     if (isset($_POST['mark_read'])) {
         $messageId = (int)$_POST['message_id'];
-        $messageService->markAsRead($messageId, $currentUser['id']);
+        $messageService->markMessageAsRead($messageId, $currentUser['id']);
     }
 }
 
@@ -89,10 +94,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $messages = $messageService->getUserMessages($currentUser['id']);
 
 // Get users that can receive messages (allow_messages = 1 and not blocked)
-$availableUsers = $messageService->getAvailableUsers($currentUser['id']);
+// Build from User service and filter blocked/blocked-by
+$allUsers = $userService->getAllUsers($currentUser['id'], true);
+$availableUsers = [];
+foreach ($allUsers as $u) {
+    if ($userService->isUserBlocked($currentUser['id'], $u['id'])) { // I block them
+        continue;
+    }
+    if ($userService->isUserBlocked($u['id'], $currentUser['id'])) { // they block me
+        continue;
+    }
+    $availableUsers[] = $u;
+}
 
 // Get blocked users
-$blockedUsers = $messageService->getBlockedUsers($currentUser['id']);
+$blockedUsers = $userService->getBlockedUsers($currentUser['id']);
 
 // Get custom background if set
 $backgroundImage = 'assets/images/background.png';
@@ -436,16 +452,16 @@ if (!empty($currentUser['custom_background'])) {
                     <div class="no-messages">Keine Nachrichten vorhanden.</div>
                 <?php else: ?>
                     <?php foreach ($messages as $message): ?>
-                        <div class="message-item <?= $message['is_read'] ? '' : 'unread' ?> <?= $message['type'] === 'appointment' ? 'appointment' : '' ?>">
+                        <div class="message-item <?= $message['is_read'] ? '' : 'unread' ?> <?= $message['message_type'] === 'appointment_reminder' ? 'appointment' : '' ?>">
                             <div class="message-header">
                                 <span class="message-from">
-                                    <?= $message['type'] === 'system' ? 'System' : htmlspecialchars($message['sender_username']) ?>
+                                    <?= $message['message_type'] !== 'user_message' ? 'System' : htmlspecialchars($message['sender_username'] ?? 'Unbekannt') ?>
                                 </span>
                                 <span class="message-date"><?= date('d.m.Y H:i', strtotime($message['created_at'])) ?></span>
                             </div>
                             
                             <div class="message-subject"><?= htmlspecialchars($message['subject']) ?></div>
-                            <div class="message-content"><?= nl2br(htmlspecialchars($message['message'])) ?></div>
+                            <div class="message-content"><?= nl2br(htmlspecialchars($message['content'])) ?></div>
                             
                             <div class="message-actions">
                                 <?php if (!$message['is_read']): ?>
@@ -455,7 +471,7 @@ if (!empty($currentUser['custom_background'])) {
                                     </form>
                                 <?php endif; ?>
                                 
-                                <?php if ($message['type'] === 'user' && $message['sender_id'] !== $currentUser['id']): ?>
+                                <?php if ($message['message_type'] === 'user_message' && $message['sender_id'] !== $currentUser['id']): ?>
                                     <button onclick="toggleReply(<?= $message['id'] ?>)" class="btn-small btn-reply">Antworten</button>
                                     
                                     <form method="POST" style="display: inline;">
@@ -472,7 +488,7 @@ if (!empty($currentUser['custom_background'])) {
                                 </form>
                             </div>
                             
-                            <?php if ($message['type'] === 'user' && $message['sender_id'] !== $currentUser['id']): ?>
+                            <?php if ($message['message_type'] === 'user_message' && $message['sender_id'] !== $currentUser['id']): ?>
                                 <div id="reply-<?= $message['id'] ?>" class="reply-form">
                                     <form method="POST">
                                         <input type="hidden" name="original_message_id" value="<?= $message['id'] ?>">
@@ -480,7 +496,7 @@ if (!empty($currentUser['custom_background'])) {
                                             <label>Antwort:</label>
                                             <textarea name="reply_message" required placeholder="Ihre Antwort..."></textarea>
                                         </div>
-                                        <button type="submit" name="reply_message" class="btn-primary">Antwort senden</button>
+                                        <button type="submit" name="reply_message_submit" class="btn-primary">Antwort senden</button>
                                     </form>
                                 </div>
                             <?php endif; ?>

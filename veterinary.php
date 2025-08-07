@@ -35,6 +35,27 @@ if (!$kitten) {
     exit;
 }
 
+// Helper to shorten text safely without requiring mbstring
+if (!function_exists('shorten_text')) {
+    function shorten_text($text, $max = 30) {
+        $text = (string)$text;
+        if ($max < 2) { return $text; }
+        if (function_exists('mb_strimwidth')) {
+            return mb_strimwidth($text, 0, $max, '…', 'UTF-8');
+        }
+        if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+            if (mb_strlen($text, 'UTF-8') <= $max) {
+                return $text;
+            }
+            return mb_substr($text, 0, $max - 1, 'UTF-8') . '…';
+        }
+        if (strlen($text) <= $max) {
+            return $text;
+        }
+        return substr($text, 0, $max - 1) . '…';
+    }
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['save_vet'])) {
@@ -268,7 +289,7 @@ if (!empty($currentUser['custom_background'])) {
                             <tr>
                                 <td><?= date('d.m.Y', strtotime($vr['visit_date'])) ?></td>
                                 <td><?= htmlspecialchars($vr['veterinarian_name'] ?: '-') ?></td>
-                                <td><?= htmlspecialchars(mb_strimwidth($vr['vaccination'] ?: '-', 0, 30, '…')) ?></td>
+                                <td><?= htmlspecialchars(shorten_text($vr['vaccination'] ?: '-', 30)) ?></td>
                                 <td><?= $vr['next_vaccination_date'] ? date('d.m.Y', strtotime($vr['next_vaccination_date'])) : '-' ?></td>
                                 <td><?= $vr['next_visit_date'] ? date('d.m.Y', strtotime($vr['next_visit_date'])) : '-' ?></td>
                                 <td><?= $vr['cost_eur'] !== null ? number_format((float)$vr['cost_eur'], 2, ',', '') : '-' ?></td>
