@@ -25,6 +25,8 @@ if (!$kittenId) {
 
 // POST actions: share / unshare
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // For POST responses return JSON
+    header('Content-Type: application/json; charset=UTF-8');
     $action = $_POST['action'] ?? '';
     if ($action === 'share') {
         $shareWithUserId = (int)($_POST['user_id'] ?? 0);

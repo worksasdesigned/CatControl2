@@ -466,10 +466,10 @@ if (!empty($currentUser['custom_background'])) {
                     <?php endif; ?>
                     
                     <?php if ($kitten['profile_image']): ?>
-                        <img src="uploads/kittens/<?= htmlspecialchars($kitten['profile_image']) ?>" 
+                        <img src="uploads/kitten_images/<?= htmlspecialchars($kitten['profile_image']) ?>" 
                              alt="<?= htmlspecialchars($kitten['name']) ?>" 
                              class="kitten-profile-image"
-                             onclick="showImageModal('uploads/kittens/<?= htmlspecialchars($kitten['profile_image']) ?>')">
+                             onclick="showImageModal('uploads/kitten_images/<?= htmlspecialchars($kitten['profile_image']) ?>')">
                     <?php else: ?>
                         <div class="kitten-profile-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 2em;">🐱</div>
                     <?php endif; ?>
