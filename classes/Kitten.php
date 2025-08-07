@@ -410,6 +410,122 @@ class Kitten {
         }
     }
 
+    // === Veterinary records API ===
+    public function addVeterinaryRecord(array $data) {
+        $required = ['kitten_id', 'user_id', 'visit_date'];
+        foreach ($required as $key) {
+            if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+                return false;
+            }
+        }
+
+        $sql = "INSERT INTO veterinary_records (
+                    kitten_id, user_id, visit_date, veterinarian_name, diagnosis,
+                    vaccination, next_vaccination_date, deworming, deworming_medication,
+                    next_deworming_interval, tick_protection, tick_protection_medication,
+                    next_tick_protection_interval, next_visit_date, cost_eur
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            $this->db->execute($sql, [
+                (int)$data['kitten_id'],
+                (int)$data['user_id'],
+                $data['visit_date'],
+                $data['veterinarian_name'] ?? null,
+                $data['diagnosis'] ?? null,
+                $data['vaccination'] ?? null,
+                $data['next_vaccination_date'] ?: null,
+                isset($data['deworming']) ? (int)(bool)$data['deworming'] : 0,
+                $data['deworming_medication'] ?? null,
+                $data['next_deworming_interval'] ?? null,
+                isset($data['tick_protection']) ? (int)(bool)$data['tick_protection'] : 0,
+                $data['tick_protection_medication'] ?? null,
+                $data['next_tick_protection_interval'] ?? null,
+                $data['next_visit_date'] ?: null,
+                $data['cost_eur'] !== '' ? $data['cost_eur'] : null
+            ]);
+            return true;
+        } catch (Exception $e) {
+            error_log('addVeterinaryRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getVeterinaryRecords(int $kittenId) {
+        $sql = "SELECT * FROM veterinary_records WHERE kitten_id = ? ORDER BY visit_date DESC, created_at DESC";
+        try {
+            return $this->db->fetchAll($sql, [$kittenId]);
+        } catch (Exception $e) {
+            error_log('getVeterinaryRecords error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getVeterinaryRecordById(int $recordId) {
+        $sql = "SELECT * FROM veterinary_records WHERE id = ?";
+        return $this->db->fetch($sql, [$recordId]);
+    }
+
+    public function getLastVeterinarianName(int $kittenId) {
+        $sql = "SELECT veterinarian_name FROM veterinary_records WHERE kitten_id = ? AND veterinarian_name IS NOT NULL AND veterinarian_name != '' ORDER BY visit_date DESC, id DESC LIMIT 1";
+        $row = $this->db->fetch($sql, [$kittenId]);
+        return $row ? $row['veterinarian_name'] : null;
+    }
+
+    public function updateVeterinaryRecord(int $recordId, int $kittenId, array $data) {
+        $sql = "UPDATE veterinary_records SET 
+                    visit_date = ?,
+                    veterinarian_name = ?,
+                    diagnosis = ?,
+                    vaccination = ?,
+                    next_vaccination_date = ?,
+                    deworming = ?,
+                    deworming_medication = ?,
+                    next_deworming_interval = ?,
+                    tick_protection = ?,
+                    tick_protection_medication = ?,
+                    next_tick_protection_interval = ?,
+                    next_visit_date = ?,
+                    cost_eur = ?
+                WHERE id = ? AND kitten_id = ?";
+        try {
+            $this->db->execute($sql, [
+                $data['visit_date'],
+                $data['veterinarian_name'] ?? null,
+                $data['diagnosis'] ?? null,
+                $data['vaccination'] ?? null,
+                $data['next_vaccination_date'] ?: null,
+                isset($data['deworming']) ? (int)(bool)$data['deworming'] : 0,
+                $data['deworming_medication'] ?? null,
+                $data['next_deworming_interval'] ?? null,
+                isset($data['tick_protection']) ? (int)(bool)$data['tick_protection'] : 0,
+                $data['tick_protection_medication'] ?? null,
+                $data['next_tick_protection_interval'] ?? null,
+                $data['next_visit_date'] ?: null,
+                $data['cost_eur'] !== '' ? $data['cost_eur'] : null,
+                $recordId,
+                $kittenId
+            ]);
+            return true;
+        } catch (Exception $e) {
+            error_log('updateVeterinaryRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteVeterinaryRecord(int $recordId, int $kittenId) {
+        try {
+            $rows = $this->db->execute(
+                "DELETE FROM veterinary_records WHERE id = ? AND kitten_id = ?",
+                [$recordId, $kittenId]
+            );
+            return $rows > 0;
+        } catch (Exception $e) {
+            error_log('deleteVeterinaryRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     private function mapFoodType($value) {
         if ($value === null || $value === '') {
             return null;

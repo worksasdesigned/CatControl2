@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/EmailService.php';
 
 class MessageService {
     private $db;
@@ -206,6 +207,18 @@ class MessageService {
                 // Send internal message
                 $this->sendAppointmentReminder($appointment['owner_id'], $subject, $content);
                 
+                // Send email if SMTP configured
+                $emailService = new EmailService();
+                if (!empty($appointment['email'])) {
+                    $emailService->sendAppointmentReminder(
+                        $appointment['email'],
+                        $appointment['username'],
+                        $appointment['kitten_name'],
+                        $reminderType,
+                        $reminderDate
+                    );
+                }
+                
                 // Create reminder record
                 $insertSql = "INSERT INTO reminder_notifications (kitten_id, user_id, reminder_type, reminder_date) 
                              VALUES (?, ?, ?, ?)";
@@ -243,22 +256,33 @@ class MessageService {
         
         foreach ($records as $record) {
             // Process deworming reminders
-            if ($record['next_deworming_interval'] && isset($intervalMap[$record['next_deworming_interval']])) {
-                $nextDate = date('Y-m-d', strtotime($record['visit_date'] . ' +' . $intervalMap[$record['next_deworming_interval']] . ' days'));
-                $reminderDate = date('Y-m-d', strtotime($nextDate . ' -3 days'));
-                
-                if ($reminderDate == date('Y-m-d')) {
-                    $subject = "Erinnerung: Entwurmung für " . $record['kitten_name'];
-                    $content = "Ihr Kätzchen " . $record['kitten_name'] . " sollte in 3 Tagen entwurmt werden.\n\n";
-                    $content .= "Geplantes Datum: " . date('d.m.Y', strtotime($nextDate)) . "\n";
-                    if ($record['deworming_medication']) {
-                        $content .= "Medikament: " . $record['deworming_medication'] . "\n";
-                    }
+                            if ($record['next_deworming_interval'] && isset($intervalMap[$record['next_deworming_interval']])) {
+                    $nextDate = date('Y-m-d', strtotime($record['visit_date'] . ' +' . $intervalMap[$record['next_deworming_interval']] . ' days'));
+                    $reminderDate = date('Y-m-d', strtotime($nextDate . ' -3 days'));
                     
-                    $this->sendAppointmentReminder($record['owner_id'], $subject, $content);
-                    $remindersCreated++;
+                    if ($reminderDate == date('Y-m-d')) {
+                        $subject = "Erinnerung: Entwurmung für " . $record['kitten_name'];
+                        $content = "Ihr Kätzchen " . $record['kitten_name'] . " sollte in 3 Tagen entwurmt werden.\n\n";
+                        $content .= "Geplantes Datum: " . date('d.m.Y', strtotime($nextDate)) . "\n";
+                        if ($record['deworming_medication']) {
+                            $content .= "Medikament: " . $record['deworming_medication'] . "\n";
+                        }
+                        
+                        $this->sendAppointmentReminder($record['owner_id'], $subject, $content);
+                        // Email as well
+                        $emailService = new EmailService();
+                        if (!empty($record['email'])) {
+                            $emailService->sendAppointmentReminder(
+                                $record['email'],
+                                $record['username'],
+                                $record['kitten_name'],
+                                'deworming',
+                                $nextDate
+                            );
+                        }
+                        $remindersCreated++;
+                    }
                 }
-            }
             
             // Process tick protection reminders
             if ($record['next_tick_protection_interval'] && isset($intervalMap[$record['next_tick_protection_interval']])) {
