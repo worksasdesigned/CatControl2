@@ -141,6 +141,35 @@ class User {
             return ['success' => false, 'message' => 'Profil konnte nicht aktualisiert werden'];
         }
     }
+
+    // Ergänzung: Allgemeine Update-Methode, wie sie in profile.php erwartet wird
+    public function updateUser($userId, array $data) {
+        $allowedFields = ['username', 'email', 'country', 'city', 'allow_messages', 'custom_background'];
+        $updateFields = [];
+        $params = [];
+
+        foreach ($data as $field => $value) {
+            if (in_array($field, $allowedFields, true)) {
+                $updateFields[] = "$field = ?";
+                $params[] = $value;
+            }
+        }
+
+        if (empty($updateFields)) {
+            return false;
+        }
+
+        $params[] = $userId;
+        $sql = "UPDATE users SET " . implode(', ', $updateFields) . " WHERE id = ?";
+
+        try {
+            $this->db->execute($sql, $params);
+            return true;
+        } catch (Exception $e) {
+            error_log("updateUser error: " . $e->getMessage());
+            return false;
+        }
+    }
     
     public function requestPasswordReset($email) {
         $user = $this->getUserByEmail($email);
