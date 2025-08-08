@@ -60,6 +60,7 @@ CREATE TABLE kittens (
     sex ENUM('kater', 'katze', 'unbekannt') DEFAULT 'unbekannt',
     profile_image VARCHAR(255),
     is_public BOOLEAN DEFAULT FALSE,
+    is_archived BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,

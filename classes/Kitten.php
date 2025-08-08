@@ -8,6 +8,19 @@ class Kitten {
     
     public function __construct() {
         $this->db = Database::getInstance();
+        $this->ensureArchiveColumn();
+    }
+    
+    private function ensureArchiveColumn() {
+        try {
+            $result = $this->db->fetch("SHOW COLUMNS FROM kittens LIKE 'is_archived'");
+            if (!$result) {
+                $this->db->execute("ALTER TABLE kittens ADD COLUMN is_archived BOOLEAN DEFAULT FALSE AFTER is_public");
+            }
+        } catch (Exception $e) {
+            // Ignore to avoid breaking runtime if permissions disallow ALTER; features relying on the column may fail until schema is updated
+            error_log('ensureArchiveColumn error: ' . $e->getMessage());
+        }
     }
     
     public function createKitten($ownerId, $data) {
@@ -54,7 +67,7 @@ class Kitten {
         }
         
         $allowedFields = ['name', 'birth_date', 'color', 'mother', 'found_location', 
-                         'found_date', 'tasso_id', 'ear_tattoo', 'postal_code', 'is_public', 'sex'];
+                         'found_date', 'tasso_id', 'ear_tattoo', 'postal_code', 'is_public', 'sex', 'is_archived'];
         
         $updateFields = [];
         $params = [];
@@ -124,8 +137,9 @@ class Kitten {
                             (SELECT filename FROM kitten_images WHERE kitten_id = k.id ORDER BY upload_date DESC LIMIT 1)
                         ) as profile_image
                  FROM kittens k 
-                 WHERE k.owner_id = ? 
-                    OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?)
+                 WHERE (k.owner_id = ? 
+                    OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?))
+                    AND COALESCE(k.is_archived, 0) = 0
                  ORDER BY k.created_at DESC";
          
          return $this->db->fetchAll($sql, [$userId, $userId]);
@@ -139,7 +153,7 @@ class Kitten {
                         ) as profile_image
                 FROM kittens k 
                 JOIN users u ON k.owner_id = u.id
-                WHERE k.is_public = 1 
+                WHERE k.is_public = 1 AND COALESCE(k.is_archived, 0) = 0
                 ORDER BY k.created_at DESC 
                 LIMIT ? OFFSET ?";
         
@@ -154,6 +168,20 @@ class Kitten {
         
         $result = $this->db->fetch($sql, [$kittenId, $userId, $userId]);
         return $result['count'] > 0;
+    }
+    
+    public function getArchivedKittensForUser($userId) {
+        $sql = "SELECT k.*, 
+                       COALESCE(
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id AND is_profile_image = 1 LIMIT 1),
+                            (SELECT filename FROM kitten_images WHERE kitten_id = k.id ORDER BY upload_date DESC LIMIT 1)
+                        ) as profile_image
+                 FROM kittens k 
+                 WHERE (k.owner_id = ? 
+                    OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?))
+                    AND COALESCE(k.is_archived, 0) = 1
+                 ORDER BY k.updated_at DESC";
+        return $this->db->fetchAll($sql, [$userId, $userId]);
     }
     
     public function shareKitten($kittenId, $ownerId, $shareWithUserId) {

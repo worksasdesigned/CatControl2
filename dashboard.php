@@ -436,6 +436,7 @@ if (!empty($currentUser['custom_background'])) {
                     <a href="change-password.php">Passwort ändern</a>
                     <a href="messages.php">Nachrichten</a>
                     <a href="public-kittens.php">Öffentliche Kätzchen</a>
+                    <a href="archived-kittens.php">Archivierte Kätzchen</a>
                     <a href="logout.php">Abmelden</a>
                 </div>
             </div>
