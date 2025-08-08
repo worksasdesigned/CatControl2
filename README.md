@@ -447,6 +447,9 @@ Führen Sie folgende SQL-Befehle aus, wenn Sie von einer älteren Version aktual
 -- Nur ausführen, falls Spalte nicht existiert
 ALTER TABLE kittens ADD COLUMN sex ENUM('kater','katze','unbekannt') DEFAULT 'unbekannt';
 
+-- Nur ausführen, falls Spalte nicht existiert
+ALTER TABLE kittens ADD COLUMN is_archived BOOLEAN DEFAULT FALSE AFTER is_public;
+
 -- Nur ausführen, falls Wert 'gelb' noch nicht im ENUM vorhanden ist
 ALTER TABLE feeding_records MODIFY COLUMN stool_color ENUM('braun','schwarz','orange','rot','grau','gelb','sonstiges');
 
