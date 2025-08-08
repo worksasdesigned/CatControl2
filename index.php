@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     setcookie('remembered_username', $username, time() + (30 * 24 * 60 * 60), '/'); // 30 days
                 }
                 
-                // Check if first login and redirect accordingly
-                if ($result['first_login']) {
+                // Only force password change for default admin on first login
+                if (strtolower($username) === 'admin' && !empty($result['first_login'])) {
                     header('Location: change-password.php?first_login=1');
                 } else {
                     header('Location: dashboard.php');

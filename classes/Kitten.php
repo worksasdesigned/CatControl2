@@ -20,8 +20,8 @@ class Kitten {
         }
         
         $sql = "INSERT INTO kittens (owner_id, name, birth_date, color, mother, found_location, 
-                found_date, tasso_id, ear_tattoo, postal_code) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                found_date, tasso_id, ear_tattoo, postal_code, sex) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try {
             $this->db->execute($sql, [
@@ -34,7 +34,8 @@ class Kitten {
                 $data['found_date'] ?? null,
                 $data['tasso_id'] ?? null,
                 $data['ear_tattoo'] ?? null,
-                $data['postal_code'] ?? null
+                $data['postal_code'] ?? null,
+                $data['sex'] ?? 'unbekannt'
             ]);
             
             $kittenId = $this->db->lastInsertId();
@@ -53,7 +54,7 @@ class Kitten {
         }
         
         $allowedFields = ['name', 'birth_date', 'color', 'mother', 'found_location', 
-                         'found_date', 'tasso_id', 'ear_tattoo', 'postal_code', 'is_public'];
+                         'found_date', 'tasso_id', 'ear_tattoo', 'postal_code', 'is_public', 'sex'];
         
         $updateFields = [];
         $params = [];
@@ -349,13 +350,14 @@ class Kitten {
         $stoolColor = $this->mapStoolColor($feedingData['stool_color'] ?? null);
         $stoolColorOther = $feedingData['stool_color_other'] ?? null;
         $fitnessLevel = isset($feedingData['fitness_level']) && $feedingData['fitness_level'] !== '' ? (int)$feedingData['fitness_level'] : null;
+        $eyesOpen = isset($feedingData['eyes_open']) ? (int)(bool)$feedingData['eyes_open'] : null;
         $notes = isset($feedingData['notes']) ? trim($feedingData['notes']) : null;
 
         $sql = "INSERT INTO feeding_records (
                     kitten_id, user_id, feeding_date, weight_grams, food_amount_grams,
                     food_type, heating_pad_refilled, stool_type, stool_consistency,
-                    stool_color, stool_color_other, fitness_level, notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    stool_color, stool_color_other, fitness_level, eyes_open, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             $this->db->execute($sql, [
@@ -371,6 +373,7 @@ class Kitten {
                 $stoolColor,
                 $stoolColorOther,
                 $fitnessLevel,
+                $eyesOpen,
                 $notes
             ]);
             return true;
@@ -393,7 +396,8 @@ class Kitten {
                      weight_grams AS weight,
                      food_amount_grams AS food_amount,
                      food_type,
-                     fitness_level
+                     fitness_level,
+                     notes
                  FROM feeding_records
                  WHERE kitten_id = ?
                  ORDER BY feeding_date DESC" . $limitSql;
@@ -441,6 +445,7 @@ class Kitten {
         $stoolColor = $this->mapStoolColor($data['stool_color'] ?? null);
         $stoolColorOther = $data['stool_color_other'] ?? null;
         $fitnessLevel = isset($data['fitness_level']) && $data['fitness_level'] !== '' ? (int)$data['fitness_level'] : null;
+        $eyesOpen = isset($data['eyes_open']) ? (int)(bool)$data['eyes_open'] : null;
         $notes = isset($data['notes']) ? trim($data['notes']) : null;
 
         $sql = "UPDATE feeding_records SET 
@@ -454,6 +459,7 @@ class Kitten {
                     stool_color = ?,
                     stool_color_other = ?,
                     fitness_level = ?,
+                    eyes_open = ?,
                     notes = ?
                 WHERE id = ? AND kitten_id = ?";
         try {
@@ -468,6 +474,7 @@ class Kitten {
                 $stoolColor,
                 $stoolColorOther,
                 $fitnessLevel,
+                $eyesOpen,
                 $notes,
                 $recordId,
                 $kittenId
@@ -646,8 +653,32 @@ class Kitten {
             'orange' => 'orange',
             'red' => 'rot',
             'gray' => 'grau',
+            'yellow' => 'gelb',
             'other' => 'sonstiges'
         ];
         return $map[$value] ?? null;
+    }
+
+    public function hasWeightRecordOnDate(int $kittenId, string $dateYmd): bool {
+        $sql = "SELECT COUNT(*) AS cnt FROM feeding_records WHERE kitten_id = ? AND DATE(feeding_date) = ? AND weight_grams IS NOT NULL";
+        try {
+            $row = $this->db->fetch($sql, [$kittenId, $dateYmd]);
+            return !empty($row) && (int)$row['cnt'] > 0;
+        } catch (Exception $e) {
+            error_log('hasWeightRecordOnDate error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getLastEyesOpenStatus(int $kittenId): ?int {
+        $sql = "SELECT eyes_open FROM feeding_records WHERE kitten_id = ? AND eyes_open IS NOT NULL ORDER BY feeding_date DESC, id DESC LIMIT 1";
+        try {
+            $row = $this->db->fetch($sql, [$kittenId]);
+            if (!$row) return null;
+            return $row['eyes_open'] === null ? null : (int)$row['eyes_open'];
+        } catch (Exception $e) {
+            error_log('getLastEyesOpenStatus error: ' . $e->getMessage());
+            return null;
+        }
     }
 }

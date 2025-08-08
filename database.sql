@@ -16,7 +16,7 @@ CREATE TABLE users (
     custom_background VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    first_login BOOLEAN DEFAULT TRUE,
+    first_login BOOLEAN DEFAULT FALSE,
     INDEX idx_username (username),
     INDEX idx_email (email)
 );
@@ -57,6 +57,7 @@ CREATE TABLE kittens (
     tasso_id VARCHAR(50),
     ear_tattoo VARCHAR(50),
     postal_code VARCHAR(10),
+    sex ENUM('kater', 'katze', 'unbekannt') DEFAULT 'unbekannt',
     profile_image VARCHAR(255),
     is_public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,9 +92,10 @@ CREATE TABLE feeding_records (
     heating_pad_refilled BOOLEAN DEFAULT FALSE,
     stool_type ENUM('urin', 'kot', 'beides'),
     stool_consistency ENUM('fest', 'fluessig'),
-    stool_color ENUM('braun', 'schwarz', 'orange', 'rot', 'grau', 'sonstiges'),
+    stool_color ENUM('braun', 'schwarz', 'orange', 'rot', 'grau', 'gelb', 'sonstiges'),
     stool_color_other VARCHAR(100),
     fitness_level INT DEFAULT 5 CHECK (fitness_level >= 0 AND fitness_level <= 10),
+    eyes_open BOOLEAN,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
