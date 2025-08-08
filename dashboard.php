@@ -512,6 +512,10 @@ if (!empty($currentUser['custom_background'])) {
                             📊
                             <div class="tooltip">Gewichtsstatistik</div>
                         </span>
+                        <span class="feature-icon" onclick="location.href='add-kitten.php?kitten_id=<?= $kitten['id'] ?>'">
+                            ✏️
+                            <div class="tooltip">Kätzchen bearbeiten</div>
+                        </span>
                         <span class="feature-icon" onclick="showShareModal(<?= $kitten['id'] ?>, '<?= htmlspecialchars($kitten['name']) ?>')">
                             👥
                             <div class="tooltip">Benutzer hinzufügen</div>
