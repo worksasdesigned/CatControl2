@@ -28,8 +28,8 @@ class User {
         
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         
-        $sql = "INSERT INTO users (username, email, password_hash, country, city, allow_messages) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO users (username, email, password_hash, country, city, allow_messages, first_login) 
+                VALUES (?, ?, ?, ?, ?, ?, 0)";
         
         try {
             $this->db->execute($sql, [$username, $email, $passwordHash, $country, $city, $allowMessages ? 1 : 0]);

@@ -106,11 +106,21 @@ sudo chmod -R 775 /var/www/html/catcontrol/uploads
 sudo rm /var/www/html/catcontrol/install.php
 ```
 
+### 7. Admin-Passwort zurücksetzen (optional)
+
+Falls Sie das Passwort des Standard-Admin-Benutzers (`admin`) zurücksetzen möchten, können Sie vorübergehend die Datei `resetAdmin.php` verwenden:
+
+1. Rufen Sie `http://IhreIP/catcontrol/resetAdmin.php` im Browser auf
+2. Bestätigen Sie das Zurücksetzen – das Passwort wird auf `katze` gesetzt und beim nächsten Login zur Änderung aufgefordert
+3. **Sicherheits-Hinweis:** Löschen Sie die Datei nach Verwendung umgehend!
+
+```bash
+sudo rm /var/www/html/catcontrol/resetAdmin.php
+```
+
 ## ⚙️ Erweiterte Konfiguration
 
 ### Apache Virtual Host (empfohlen)
-
-Erstellen Sie eine dedizierte Virtual Host Konfiguration:
 
 ```bash
 sudo nano /etc/apache2/sites-available/catcontrol.conf
@@ -429,11 +439,29 @@ sudo systemctl restart apache2 mariadb
 3. Dateien ersetzen (config-Verzeichnis ausgenommen)
 4. Browser-Cache leeren
 
+### Datenbank-Upgrade (bestehende Installationen)
+
+Führen Sie folgende SQL-Befehle aus, wenn Sie von einer älteren Version aktualisieren:
+
+```sql
+-- Nur ausführen, falls Spalte nicht existiert
+ALTER TABLE kittens ADD COLUMN sex ENUM('kater','katze','unbekannt') DEFAULT 'unbekannt';
+
+-- Nur ausführen, falls Wert 'gelb' noch nicht im ENUM vorhanden ist
+ALTER TABLE feeding_records MODIFY COLUMN stool_color ENUM('braun','schwarz','orange','rot','grau','gelb','sonstiges');
+
+-- Augenstatus Feld ergänzen (falls nicht vorhanden)
+ALTER TABLE feeding_records ADD COLUMN eyes_open BOOLEAN NULL AFTER fitness_level;
+
+-- Optional: first_login Default nur für Neuinstallationen ändern
+-- (bestehende Tabellen können so bleiben); für Neu-User wird ohnehin 0 gesetzt
+```
+
 ## 📞 Support und Dokumentation
 
 ### Standard-Benutzer
 - **Benutzername:** admin
-- **Passwort:** katze (muss beim ersten Login geändert werden)
+- **Passwort:** katze (beim ersten Login wird nur für den Benutzer `admin` eine Passwortänderung erzwungen)
 
 ### Wichtige Verzeichnisse
 - **Anwendung:** `/var/www/html/catcontrol/`

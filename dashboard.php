@@ -222,6 +222,9 @@ if (!empty($currentUser['custom_background'])) {
             margin-bottom: 10px;
         }
         
+        .kitten-name a { color: inherit; text-decoration: none; }
+        .sex-icon { font-size: 1.1em; margin-left: 6px; }
+        
         .kitten-info {
             margin-bottom: 15px;
             font-size: 14px;
@@ -459,6 +462,8 @@ if (!empty($currentUser['custom_background'])) {
                 $weight = $kittenService->getLatestWeight($kitten['id']);
                 $appointments = $kittenService->getUpcomingAppointments($kitten['id']);
                 $developmentInfo = $kittenService->getKittenDevelopmentInfo($age['total_days']);
+                $sex = $kitten['sex'] ?? 'unbekannt';
+                $sexIcon = $sex === 'kater' ? '♂️' : ($sex === 'katze' ? '♀️' : '❓');
                 ?>
                 <div class="kitten-tile">
                     <?php if (!empty($appointments)): ?>
@@ -469,12 +474,12 @@ if (!empty($currentUser['custom_background'])) {
                         <img src="uploads/kitten_images/<?= htmlspecialchars($kitten['profile_image']) ?>" 
                              alt="<?= htmlspecialchars($kitten['name']) ?>" 
                              class="kitten-profile-image"
-                             onclick="showImageModal('uploads/kitten_images/<?= htmlspecialchars($kitten['profile_image']) ?>')">
+                             onclick="location.href='add-kitten.php?kitten_id=<?= $kitten['id'] ?>'">
                     <?php else: ?>
-                        <div class="kitten-profile-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 2em;">🐱</div>
+                        <div class="kitten-profile-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 2em;" onclick="location.href='add-kitten.php?kitten_id=<?= $kitten['id'] ?>'">🐱</div>
                     <?php endif; ?>
                     
-                    <div class="kitten-name"><?= htmlspecialchars($kitten['name']) ?></div>
+                    <div class="kitten-name"><a href="add-kitten.php?kitten_id=<?= $kitten['id'] ?>"><?= htmlspecialchars($kitten['name']) ?></a><span class="sex-icon"><?= $sexIcon ?></span></div>
                     
                     <div class="kitten-info">
                         <div class="kitten-age">

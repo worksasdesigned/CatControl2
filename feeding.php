@@ -45,15 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'kitten_id' => $kittenId,
             'user_id' => $currentUser['id'],
             'date_time' => $_POST['date_time'],
-            'weight' => (int)$_POST['weight'],
-            'food_amount' => (int)$_POST['food_amount'],
+            'weight' => ($_POST['weight'] === '' ? null : (int)$_POST['weight']),
+            'food_amount' => ($_POST['food_amount'] === '' ? null : (int)$_POST['food_amount']),
             'food_type' => $_POST['food_type'],
             'heat_bottle_refilled' => isset($_POST['heat_bottle_refilled']) ? 1 : 0,
             'bowel_movement' => $_POST['bowel_movement'] ?? null,
             'stool_consistency' => $_POST['stool_consistency'] ?? null,
             'stool_color' => $_POST['stool_color'],
             'stool_color_other' => $_POST['stool_color_other'] ?? null,
-            'fitness_level' => (int)$_POST['fitness_level'],
+            'fitness_level' => ($_POST['fitness_level'] === '' ? null : (int)$_POST['fitness_level']),
+            'eyes_open' => isset($_POST['eyes_open']) ? (int)$_POST['eyes_open'] : null,
             'notes' => trim($_POST['notes'])
         ];
         // Update wenn hidden field feeding_id gesetzt ist
@@ -100,6 +101,10 @@ $feedingRecords = $kittenService->getFeedingRecords($kittenId, $showAll ? 0 : 20
 // Get user preferences for field visibility
 $fieldPreferences = $userService->getFieldPreferences($currentUser['id']);
 
+// Additional state for weight hint and eyes default
+$hasWeightToday = $kittenService->hasWeightRecordOnDate($kittenId, date('Y-m-d'));
+$lastEyesOpen = $kittenService->getLastEyesOpenStatus($kittenId);
+
 // Get custom background if set
 $backgroundImage = 'assets/images/background.png';
 if (!empty($currentUser['custom_background'])) {
@@ -109,7 +114,6 @@ if (!empty($currentUser['custom_background'])) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -488,6 +492,8 @@ if (!empty($currentUser['custom_background'])) {
             cursor: pointer;
         }
         
+        .hint { color: #8d6e63; font-size: 12px; margin-top: 6px; }
+        
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -554,7 +560,10 @@ if (!empty($currentUser['custom_background'])) {
                     
                     <div class="form-group">
                         <label for="weight">Gewicht (in Gramm):</label>
-                        <input type="number" id="weight" name="weight" min="0" value="<?= htmlspecialchars($editRecord['weight_grams'] ?? '') ?>" required>
+                        <input type="number" id="weight" name="weight" min="0" value="<?= htmlspecialchars($editRecord['weight_grams'] ?? '') ?>">
+                        <?php if (!$hasWeightToday): ?>
+                            <div class="hint">Hinweis: Für heute wurde noch kein Gewicht erfasst.</div>
+                        <?php endif; ?>
                     </div>
                     
                     <!-- Hideable fields -->
@@ -616,6 +625,7 @@ if (!empty($currentUser['custom_background'])) {
                             <option value="orange" <?= $scol==='orange' ? 'selected' : '' ?>>Orange</option>
                             <option value="red" <?= $scol==='rot' ? 'selected' : '' ?>>Rot</option>
                             <option value="gray" <?= $scol==='grau' ? 'selected' : '' ?>>Grau</option>
+                            <option value="yellow" <?= $scol==='gelb' ? 'selected' : '' ?>>Gelb</option>
                             <option value="other" <?= $scol==='sonstiges' ? 'selected' : '' ?>>Sonstiges</option>
                         </select>
                         <input type="text" id="stool_color_other" name="stool_color_other" 
@@ -631,6 +641,15 @@ if (!empty($currentUser['custom_background'])) {
                                    min="0" max="10" value="<?= $fl ?>" class="slider" 
                                    oninput="updateSliderValue(this)">
                             <div class="slider-value" id="fitness_value"><?= $fl ?></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Augenstatus:</label>
+                        <?php $eyes = isset($editRecord['eyes_open']) ? (int)$editRecord['eyes_open'] : ($lastEyesOpen ?? 0); ?>
+                        <div class="radio-group">
+                            <label><input type="radio" name="eyes_open" value="1" <?= $eyes === 1 ? 'checked' : '' ?>> Augen offen</label>
+                            <label><input type="radio" name="eyes_open" value="0" <?= $eyes === 0 ? 'checked' : '' ?>> Augen geschlossen</label>
                         </div>
                     </div>
                 </div>
@@ -662,6 +681,7 @@ if (!empty($currentUser['custom_background'])) {
                             <th>Gewicht</th>
                             <th>Futter</th>
                             <th>Fitness</th>
+                            <th>Bemerkung</th>
                             <th>Aktionen</th>
                         </tr>
                     </thead>
@@ -669,9 +689,10 @@ if (!empty($currentUser['custom_background'])) {
                         <?php foreach ($feedingRecords as $record): ?>
                             <tr>
                                 <td><?= date('d.m.Y H:i', strtotime($record['date_time'])) ?></td>
-                                <td><?= $record['weight'] ?>g</td>
-                                <td><?= $record['food_amount'] ?>g (<?= ucfirst($record['food_type']) ?>)</td>
-                                <td><?= $record['fitness_level'] ?>/10</td>
+                                <td><?= ($record['weight'] !== null && $record['weight'] !== '') ? ((int)$record['weight'] . 'g') : '—' ?></td>
+                                <td><?= ($record['food_amount'] !== null ? (int)$record['food_amount'] . 'g' : '—') ?> (<?= ucfirst($record['food_type']) ?>)</td>
+                                <td><?= $record['fitness_level'] !== null ? ((int)$record['fitness_level'] . '/10') : '—' ?></td>
+                                <td><?= htmlspecialchars($record['notes'] ?? '') ?></td>
                                 <td>
                                     <button class="btn-small btn-edit" onclick="editRecord(<?= $record['id'] ?>)">Ändern</button>
                                     <form method="POST" style="display: inline;">
