@@ -559,7 +559,9 @@ if (!empty($currentUser['custom_background'])) {
             window.location.href = 'messages.php';
         }
 
+        let currentShareKittenId = null;
         function showShareModal(kittenId, kittenName) {
+            currentShareKittenId = kittenId;
             document.getElementById('shareModal').style.display = 'block';
             
             // Load share content via AJAX
@@ -571,6 +573,46 @@ if (!empty($currentUser['custom_background'])) {
                 .catch(error => {
                     document.getElementById('shareContent').innerHTML = '<p>Fehler beim Laden der Benutzer.</p>';
                 });
+        }
+
+        function shareWithSelected() {
+            const select = document.getElementById('shareUserSelect');
+            if (!select || !currentShareKittenId) return;
+            const userId = parseInt(select.value, 10);
+            if (!userId) return;
+            fetch('ajax/share-kitten.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ action: 'share', kitten_id: String(currentShareKittenId), user_id: String(userId) })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    // Reload modal content to update lists
+                    return fetch(`ajax/share-kitten.php?kitten_id=${currentShareKittenId}`)
+                        .then(r => r.text())
+                        .then(html => { document.getElementById('shareContent').innerHTML = html; });
+                } else {
+                    alert(data.message || 'Fehler beim Teilen');
+                }
+            }).catch(() => alert('Fehler beim Teilen'));
+        }
+
+        function unshareUser(userId) {
+            if (!confirm('Zugriff wirklich entfernen?')) return;
+            if (!currentShareKittenId) return;
+            fetch('ajax/share-kitten.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ action: 'unshare', kitten_id: String(currentShareKittenId), user_id: String(userId) })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    // Reload modal content to update lists
+                    return fetch(`ajax/share-kitten.php?kitten_id=${currentShareKittenId}`)
+                        .then(r => r.text())
+                        .then(html => { document.getElementById('shareContent').innerHTML = html; });
+                } else {
+                    alert(data.message || 'Fehler beim Entfernen');
+                }
+            }).catch(() => alert('Fehler beim Entfernen'));
         }
 
         function closeShareModal() {

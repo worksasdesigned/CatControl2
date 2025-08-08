@@ -419,6 +419,66 @@ class Kitten {
         }
     }
 
+    public function getFeedingRecordById(int $recordId) {
+        $sql = "SELECT * FROM feeding_records WHERE id = ?";
+        try {
+            return $this->db->fetch($sql, [$recordId]);
+        } catch (Exception $e) {
+            error_log('getFeedingRecordById error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function updateFeedingRecord(int $recordId, int $kittenId, array $data) {
+        // Map incoming form-like fields to DB columns similar to addFeedingRecord
+        $feedingDate = date('Y-m-d H:i:s', strtotime($data['date_time']));
+        $weightGrams = isset($data['weight']) && $data['weight'] !== '' ? (int)$data['weight'] : null;
+        $foodAmountGrams = isset($data['food_amount']) && $data['food_amount'] !== '' ? (int)$data['food_amount'] : null;
+        $foodType = $this->mapFoodType($data['food_type'] ?? null);
+        $heatingPadRefilled = isset($data['heat_bottle_refilled']) ? (int)(bool)$data['heat_bottle_refilled'] : 0;
+        $stoolType = $this->mapStoolType($data['bowel_movement'] ?? null);
+        $stoolConsistency = $this->mapStoolConsistency($data['stool_consistency'] ?? null);
+        $stoolColor = $this->mapStoolColor($data['stool_color'] ?? null);
+        $stoolColorOther = $data['stool_color_other'] ?? null;
+        $fitnessLevel = isset($data['fitness_level']) && $data['fitness_level'] !== '' ? (int)$data['fitness_level'] : null;
+        $notes = isset($data['notes']) ? trim($data['notes']) : null;
+
+        $sql = "UPDATE feeding_records SET 
+                    feeding_date = ?,
+                    weight_grams = ?,
+                    food_amount_grams = ?,
+                    food_type = ?,
+                    heating_pad_refilled = ?,
+                    stool_type = ?,
+                    stool_consistency = ?,
+                    stool_color = ?,
+                    stool_color_other = ?,
+                    fitness_level = ?,
+                    notes = ?
+                WHERE id = ? AND kitten_id = ?";
+        try {
+            $this->db->execute($sql, [
+                $feedingDate,
+                $weightGrams,
+                $foodAmountGrams,
+                $foodType,
+                $heatingPadRefilled,
+                $stoolType,
+                $stoolConsistency,
+                $stoolColor,
+                $stoolColorOther,
+                $fitnessLevel,
+                $notes,
+                $recordId,
+                $kittenId
+            ]);
+            return true;
+        } catch (Exception $e) {
+            error_log('updateFeedingRecord error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // === Veterinary records API ===
     public function addVeterinaryRecord(array $data) {
         $required = ['kitten_id', 'user_id', 'visit_date'];
@@ -477,8 +537,13 @@ class Kitten {
 
     public function getLastVeterinarianName(int $kittenId) {
         $sql = "SELECT veterinarian_name FROM veterinary_records WHERE kitten_id = ? AND veterinarian_name IS NOT NULL AND veterinarian_name != '' ORDER BY visit_date DESC, id DESC LIMIT 1";
-        $row = $this->db->fetch($sql, [$kittenId]);
-        return $row ? $row['veterinarian_name'] : null;
+        try {
+            $row = $this->db->fetch($sql, [$kittenId]);
+            return $row ? $row['veterinarian_name'] : null;
+        } catch (Exception $e) {
+            error_log('getLastVeterinarianName error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function updateVeterinaryRecord(int $recordId, int $kittenId, array $data) {
