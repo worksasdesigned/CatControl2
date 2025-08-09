@@ -1,0 +1,17 @@
+# Git and VCS
+.git
+.gitignore
+
+# Node
+node_modules
+
+# PHP vendor (let container/composer manage)
+vendor
+
+# Runtime writable paths (mounted/persisted at runtime)
+uploads
+config
+
+# Misc
+*.log
+*.tmp
