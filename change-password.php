@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 
 $userService = new User();
@@ -65,11 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Passwort ändern</title>
+    <title><?= __('app.name') ?> - <?= __('menu.change_password') ?></title>
     <style>
         body {
             background-image: url('assets/images/background.png');

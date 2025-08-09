@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 require_once 'classes/Kitten.php';
 require_once 'classes/MessageService.php';
@@ -30,11 +31,11 @@ if (!empty($currentUser['custom_background'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Dashboard</title>
+    <title><?= __('app.name') ?> - <?= __('dashboard.title') ?></title>
     <style>
         * {
             margin: 0;
@@ -143,6 +144,9 @@ if (!empty($currentUser['custom_background'])) {
         .user-menu-content a:last-child {
             border-bottom: none;
         }
+        .lang-switch-inline { padding: 8px 16px; }
+        .lang-switch-inline a { color: #333; text-decoration: none; margin: 0 6px; }
+        .lang-switch-inline a:hover { text-decoration: underline; }
         
         .user-menu:hover .user-menu-content {
             display: block;
@@ -420,7 +424,7 @@ if (!empty($currentUser['custom_background'])) {
 </head>
 <body>
     <header class="header">
-        <div class="logo">🐱 CatControl</div>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
         <div class="user-info">
             <div class="messages-icon" onclick="openMessages()">
                 📧
@@ -432,12 +436,18 @@ if (!empty($currentUser['custom_background'])) {
             <div class="user-menu">
                 <button class="user-menu-btn"><?= htmlspecialchars($currentUser['username']) ?> ▼</button>
                 <div class="user-menu-content">
-                    <a href="profile.php">Profil bearbeiten</a>
-                    <a href="change-password.php">Passwort ändern</a>
-                    <a href="messages.php">Nachrichten</a>
-                    <a href="public-kittens.php">Öffentliche Kätzchen</a>
-                    <a href="archived-kittens.php">Archivierte Kätzchen</a>
-                    <a href="logout.php">Abmelden</a>
+                    <div class="lang-switch-inline">
+                        <?= __('menu.language') ?>:
+                        <a href="<?= i18n_url_with_lang('de') ?>">DE</a>
+                        <a href="<?= i18n_url_with_lang('en') ?>">EN</a>
+                        <a href="<?= i18n_url_with_lang('fr') ?>">FR</a>
+                    </div>
+                    <a href="profile.php"><?= __('menu.profile') ?></a>
+                    <a href="change-password.php"><?= __('menu.change_password') ?></a>
+                    <a href="messages.php"><?= __('menu.messages') ?></a>
+                    <a href="public-kittens.php"><?= __('menu.public_kittens') ?></a>
+                    <a href="archived-kittens.php"><?= __('menu.archived_kittens') ?></a>
+                    <a href="logout.php"><?= __('menu.logout') ?></a>
                 </div>
             </div>
         </div>
@@ -445,15 +455,15 @@ if (!empty($currentUser['custom_background'])) {
 
     <main class="main-content">
         <div class="welcome-message">
-            <h1>Willkommen, <?= htmlspecialchars($currentUser['username']) ?>!</h1>
-            <p>Verwalten Sie Ihre Kätzchen einfach und übersichtlich</p>
+            <h1><?= __('dashboard.welcome', ['username' => htmlspecialchars($currentUser['username'])]) ?></h1>
+            <p><?= __('dashboard.subtitle') ?></p>
         </div>
 
         <div class="kittens-grid">
             <!-- Add new kitten tile -->
             <a href="add-kitten.php" class="kitten-tile add-kitten-tile">
                 <div class="add-icon">➕</div>
-                <div>Neues Kätzchen anlegen</div>
+                <div><?= __('dashboard.add_kitten') ?></div>
             </a>
 
             <!-- Kitten tiles -->

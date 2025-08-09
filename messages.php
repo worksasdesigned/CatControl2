@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 require_once 'classes/MessageService.php';
 
@@ -121,11 +122,11 @@ if (!empty($currentUser['custom_background'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Nachrichten</title>
+    <title><?= __('app.name') ?> - <?= __('messages.title') ?></title>
     <style>
         * {
             margin: 0;
@@ -430,8 +431,15 @@ if (!empty($currentUser['custom_background'])) {
 </head>
 <body>
     <header class="header">
-        <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
+        <div class="back-btn">
+            <?= __('menu.language') ?>:
+            <a href="<?= i18n_url_with_lang('de') ?>">DE</a>
+            <a href="<?= i18n_url_with_lang('en') ?>">EN</a>
+            <a href="<?= i18n_url_with_lang('fr') ?>">FR</a>
+            &nbsp;|&nbsp;
+            <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
+        </div>
     </header>
 
     <main class="main-content">
@@ -446,11 +454,11 @@ if (!empty($currentUser['custom_background'])) {
         <div class="messages-container">
             <!-- Messages List -->
             <div class="messages-section">
-                <h2 class="section-title">📬 Nachrichten</h2>
+                <h2 class="section-title">📬 <?= __('messages.title') ?></h2>
                 
-                <?php if (empty($messages)): ?>
-                    <div class="no-messages">Keine Nachrichten vorhanden.</div>
-                <?php else: ?>
+                                    <?php if (empty($messages)): ?>
+                        <div class="no-messages"><?= __('messages.none') ?></div>
+                    <?php else: ?>
                     <?php foreach ($messages as $message): ?>
                         <div class="message-item <?= $message['is_read'] ? '' : 'unread' ?> <?= $message['message_type'] === 'appointment_reminder' ? 'appointment' : '' ?>">
                             <div class="message-header">
@@ -467,17 +475,17 @@ if (!empty($currentUser['custom_background'])) {
                                 <?php if (!$message['is_read']): ?>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="message_id" value="<?= $message['id'] ?>">
-                                        <button type="submit" name="mark_read" class="btn-small btn-reply">Als gelesen markieren</button>
+                                        <button type="submit" name="mark_read" class="btn-small btn-reply"><?= __('messages.mark_as_read') ?? 'Als gelesen markieren' ?></button>
                                     </form>
                                 <?php endif; ?>
                                 
                                 <?php if ($message['message_type'] === 'user_message' && $message['sender_id'] !== $currentUser['id']): ?>
-                                    <button onclick="toggleReply(<?= $message['id'] ?>)" class="btn-small btn-reply">Antworten</button>
+                                                                            <button onclick="toggleReply(<?= $message['id'] ?>)" class="btn-small btn-reply"><?= __('messages.reply') ?? 'Antworten' ?></button>
                                     
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="block_user_id" value="<?= $message['sender_id'] ?>">
                                         <button type="submit" name="block_user" class="btn-small btn-block" 
-                                                onclick="return confirm('Benutzer blockieren?')">Blockieren</button>
+                                                onclick="return confirm('Benutzer blockieren?')"><?= __('messages.block') ?></button>
                                     </form>
                                 <?php endif; ?>
                                 
@@ -493,10 +501,10 @@ if (!empty($currentUser['custom_background'])) {
                                     <form method="POST">
                                         <input type="hidden" name="original_message_id" value="<?= $message['id'] ?>">
                                         <div class="form-group">
-                                            <label>Antwort:</label>
-                                            <textarea name="reply_message" required placeholder="Ihre Antwort..."></textarea>
-                                        </div>
-                                        <button type="submit" name="reply_message_submit" class="btn-primary">Antwort senden</button>
+                                                                                            <label><?= __('messages.reply_label') ?? 'Antwort:' ?></label>
+                                                <textarea name="reply_message" required placeholder="<?= __('messages.reply_placeholder') ?? 'Ihre Antwort...' ?>"></textarea>
+                                            </div>
+                                            <button type="submit" name="reply_message_submit" class="btn-primary"><?= __('messages.reply_send') ?? 'Antwort senden' ?></button>
                                     </form>
                                 </div>
                             <?php endif; ?>
@@ -507,13 +515,13 @@ if (!empty($currentUser['custom_background'])) {
             
             <!-- Compose Message -->
             <div class="compose-section">
-                <h2 class="section-title">✉️ Neue Nachricht</h2>
+                <h2 class="section-title">✉️ <?= __('messages.new') ?? 'Neue Nachricht' ?></h2>
                 
                 <form method="POST">
                     <div class="form-group">
-                        <label for="recipient_id">Empfänger:</label>
+                        <label for="recipient_id"><?= __('messages.recipient') ?? 'Empfänger:' ?></label>
                         <select id="recipient_id" name="recipient_id" required>
-                            <option value="">Empfänger wählen...</option>
+                            <option value=""><?= __('messages.recipient_placeholder') ?? 'Empfänger wählen...' ?></option>
                             <?php foreach ($availableUsers as $user): ?>
                                 <option value="<?= $user['id'] ?>"><?= htmlspecialchars($user['username']) ?></option>
                             <?php endforeach; ?>
@@ -521,27 +529,27 @@ if (!empty($currentUser['custom_background'])) {
                     </div>
                     
                     <div class="form-group">
-                        <label for="subject">Betreff:</label>
+                        <label for="subject"><?= __('messages.subject') ?? 'Betreff:' ?></label>
                         <input type="text" id="subject" name="subject" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="message">Nachricht:</label>
+                        <label for="message"><?= __('messages.message') ?? 'Nachricht:' ?></label>
                         <textarea id="message" name="message" rows="5" required></textarea>
                     </div>
                     
-                    <button type="submit" name="send_message" class="btn-primary">Nachricht senden</button>
+                    <button type="submit" name="send_message" class="btn-primary"><?= __('messages.send') ?? 'Nachricht senden' ?></button>
                 </form>
                 
                 <?php if (!empty($blockedUsers)): ?>
                     <div class="blocked-users">
-                        <h3 style="color: #666; margin-bottom: 15px;">🚫 Blockierte Benutzer</h3>
+                        <h3 style="color: #666; margin-bottom: 15px;">🚫 <?= __('messages.blocked_users') ?></h3>
                         <?php foreach ($blockedUsers as $blockedUser): ?>
                             <div class="blocked-user">
                                 <span><?= htmlspecialchars($blockedUser['username']) ?></span>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="unblock_user_id" value="<?= $blockedUser['id'] ?>">
-                                    <button type="submit" name="unblock_user" class="btn-unblock">Entsperren</button>
+                                                                         <button type="submit" name="unblock_user" class="btn-unblock"><?= __('messages.unblock') ?? 'Entsperren' ?></button>
                                 </form>
                             </div>
                         <?php endforeach; ?>

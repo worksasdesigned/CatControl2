@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once __DIR__ . '/classes/Database.php';
 
 $db = Database::getInstance();
@@ -19,11 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Admin zurücksetzen</title>
+    <title><?= __('app.name') ?> - Admin</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 15px; }
         .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }

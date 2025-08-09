@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 require_once 'classes/Kitten.php';
 
@@ -93,11 +94,11 @@ if (!empty($currentUser['custom_background'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - <?= $editing ? 'Kätzchen bearbeiten' : 'Neues Kätzchen anlegen' ?></title>
+    <title><?= __('app.name') ?> - <?= $editing ? __('kittens.edit') ?? 'Kätzchen bearbeiten' : __('dashboard.add_kitten') ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-image: url('<?= $backgroundImage ?>'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; font-family: 'Arial', sans-serif; color: #333; }
