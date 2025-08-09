@@ -119,6 +119,20 @@ sed -i 's/max_execution_time = .*/max_execution_time = 300/' $PHP_INI
 sed -i 's/memory_limit = .*/memory_limit = 256M/' $PHP_INI
 sed -i 's/;date.timezone =.*/date.timezone = Europe\/Berlin/' $PHP_INI
 
+# shell_exec erlauben (aus disable_functions entfernen)
+if grep -qE '^\s*disable_functions\s*=' "$PHP_INI"; then
+    sed -i 's/^\(\s*disable_functions\s*=\s*.*\)\bshell_exec\b,\?\s*/\1/' "$PHP_INI"
+    # führendes Komma nach Entfernen bereinigen
+    sed -i 's/^\(\s*disable_functions\s*=\s*\),\s*/\1/' "$PHP_INI"
+    # abschließendes Komma entfernen
+    sed -i 's/\(disable_functions\s*=\s*.*\),\s*$/\1/' "$PHP_INI"
+else
+    echo "disable_functions =" >> "$PHP_INI"
+fi
+
+# Änderungen anwenden
+systemctl reload apache2
+
 print_success "PHP konfiguriert"
 
 print_status "=== Schritt 6: Webverzeichnis erstellen ==="

@@ -189,12 +189,48 @@ return [
                             mkdir($dir, 0755, true);
                         }
                     }
-                    
+
+                    // PHPMailer automatisch installieren (Composer), falls noch nicht vorhanden
+                    $mailerInstalled = false;
+                    $mailerMessage = '';
+                    $projectRoot = __DIR__;
+                    $vendorAutoload = $projectRoot . '/vendor/autoload.php';
+
+                    if (!file_exists($vendorAutoload)) {
+                        if (function_exists('shell_exec')) {
+                            // Versuche System-Composer zu finden
+                            $composerBin = trim((string) shell_exec('command -v composer || which composer 2>/dev/null'));
+                            if (!empty($composerBin)) {
+                                // Composer nutzen, um PHPMailer zu installieren
+                                shell_exec(escapeshellcmd($composerBin) . ' require phpmailer/phpmailer:^6 --no-interaction --no-progress --no-ansi 2>&1');
+                            } else {
+                                // Fallback: lokalen Composer (composer.phar) verwenden
+                                shell_exec('php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');" 2>&1');
+                                shell_exec('php composer-setup.php --quiet 2>&1');
+                                @unlink('composer-setup.php');
+                                if (file_exists($projectRoot . '/composer.phar')) {
+                                    shell_exec('php composer.phar require phpmailer/phpmailer:^6 --no-interaction --no-progress --no-ansi 2>&1');
+                                }
+                            }
+                        }
+                    }
+
+                    if (file_exists($vendorAutoload)) {
+                        $mailerInstalled = class_exists('PHPMailer\\PHPMailer\\PHPMailer') || strpos((string) @file_get_contents($projectRoot . '/composer.json'), 'phpmailer/phpmailer') !== false;
+                    }
+
+                    if ($mailerInstalled) {
+                        $mailerMessage = '• PHPMailer wurde automatisch installiert und aktiviert';
+                    } else {
+                        $mailerMessage = '• Hinweis: PHPMailer konnte nicht automatisch installiert werden. Führen Sie im Projektverzeichnis folgenden Befehl aus: <code>composer require phpmailer/phpmailer:^6</code>';
+                    }
+
                     echo '<div class="success">
                         ✅ <strong>Installation erfolgreich!</strong><br>
                         • Datenbank wurde erstellt und initialisiert<br>
                         • Konfigurationsdatei wurde erstellt<br>
                         • Upload-Verzeichnisse wurden erstellt<br>
+                        ' . $mailerMessage . '<br>
                         • Standard-Admin-Benutzer: admin / katze<br><br>
                         <strong>Wichtig:</strong> Bitte löschen Sie diese install.php Datei aus Sicherheitsgründen!
                     </div>';

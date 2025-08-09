@@ -184,7 +184,31 @@ post_max_size = 10M
 max_execution_time = 300
 memory_limit = 256M
 date.timezone = Europe/Berlin
+; shell_exec für die Installation via Composer/PHPMailer zulassen
+; Entfernen Sie shell_exec aus disable_functions (oder setzen Sie die Zeile leer)
+; Beispiel:
+; disable_functions =
 ```
+
+### PHPMailer installieren (E-Mail Versand)
+
+CatControl nutzt PHPMailer, wenn verfügbar, andernfalls wird auf `mail()` zurückgefallen. Empfohlen ist die Installation von PHPMailer via Composer.
+
+- **Automatisch:** Während der Web-Installation (`install.php`) wird versucht, PHPMailer automatisch via Composer zu installieren, sofern `shell_exec()` erlaubt ist.
+- **Manuell (falls automatisch fehlgeschlagen):**
+
+```bash
+cd /var/www/html/catcontrol
+# Systemweiten Composer verwenden (empfohlen)
+sudo composer require phpmailer/phpmailer:^6
+
+# Oder lokalen Composer nutzen
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --quiet
+php -d detect_unicode=0 composer.phar require phpmailer/phpmailer:^6
+```
+
+> Hinweis: Stellen Sie sicher, dass das Webverzeichnis die nötigen Schreibrechte für den Composer-Installationsvorgang besitzt (i.d.R. Benutzer `www-data`).
 
 ### Automatische Backups einrichten
 
