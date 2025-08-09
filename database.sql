@@ -211,8 +211,8 @@ INSERT INTO system_settings (setting_key, setting_value) VALUES
 ('admin_email', 'admin@localhost');
 
 -- Create database user
-CREATE USER IF NOT EXISTS 'phpuser'@'localhost' IDENTIFIED BY 'changeme123';
-CREATE USER IF NOT EXISTS 'phpuser'@'%' IDENTIFIED BY 'changeme123';
+-- CREATE USER IF NOT EXISTS 'phpuser'@'localhost' IDENTIFIED BY 'changeme123';
+-- CREATE USER IF NOT EXISTS 'phpuser'@'%' IDENTIFIED BY 'changeme123';
 
 -- Grant privileges
 GRANT ALL PRIVILEGES ON catcontrol.* TO 'phpuser'@'localhost';
