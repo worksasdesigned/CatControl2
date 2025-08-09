@@ -354,6 +354,28 @@ return [
     'statistics.milestones.16.title' => 'Sexual maturity approaches',
     'statistics.milestones.16.desc' => 'Neutering should be considered',
 
+    // Development (dashboard/public current stage)
+    'development.stage.newborn' => 'Newborn',
+    'development.info.newborn' => 'Eyes and ears closed, only mother’s milk',
+    'development.stage.eyes_opening' => 'Eyes start to open',
+    'development.info.eyes_opening' => 'Eyes begin to open, still dependent on mother’s milk',
+    'development.stage.hearing_develops' => 'Hearing develops',
+    'development.info.hearing_develops' => 'Ears open, first attempts to walk',
+    'development.stage.first_steps' => 'First steps',
+    'development.info.first_steps' => 'Learning to walk, play behavior begins',
+    'development.stage.socialization' => 'Socialization',
+    'development.info.socialization' => 'Intensive socialization phase, litter training possible',
+    'development.stage.weaning' => 'Weaning',
+    'development.info.weaning' => 'Transition to solid food, less mother’s milk',
+    'development.stage.independence' => 'Independence',
+    'development.info.independence' => 'Largely independent, ready for new families',
+    'development.stage.juvenile' => 'Juvenile',
+    'development.info.juvenile' => 'Fully weaned, first vaccinations due',
+    'development.stage.adolescent' => 'Adolescent',
+    'development.info.adolescent' => 'Regular veterinary visits, plan neutering',
+    'development.stage.adult' => 'Adult',
+    'development.info.adult' => 'Regular health checks and vaccinations',
+
     // Kittens (add/edit)
     'kittens.archived_hint' => 'This kitten is currently archived.',
     'kittens.validation.name_required' => 'Name is required.',

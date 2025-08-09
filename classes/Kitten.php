@@ -293,24 +293,30 @@ class Kitten {
     
     public function getKittenDevelopmentInfo($ageInDays) {
         $stages = [
-            ['min' => 0, 'max' => 7, 'stage' => 'Neugeborenes', 'info' => 'Augen und Ohren geschlossen, nur Muttermilch'],
-            ['min' => 8, 'max' => 14, 'stage' => 'Augen öffnen sich', 'info' => 'Augen beginnen sich zu öffnen, noch auf Muttermilch angewiesen'],
-            ['min' => 15, 'max' => 21, 'stage' => 'Hören entwickelt sich', 'info' => 'Ohren öffnen sich, erste Gehversuche'],
-            ['min' => 22, 'max' => 28, 'stage' => 'Erste Schritte', 'info' => 'Laufen lernen, Spielverhalten beginnt'],
-            ['min' => 29, 'max' => 35, 'stage' => 'Sozialisierung', 'info' => 'Intensive Sozialisierungsphase, Katzenklo-Training möglich'],
-            ['min' => 36, 'max' => 49, 'stage' => 'Entwöhnung', 'info' => 'Übergang zu festem Futter, weniger Muttermilch'],
-            ['min' => 50, 'max' => 63, 'stage' => 'Selbstständigkeit', 'info' => 'Weitgehend selbstständig, bereit für neue Familien'],
-            ['min' => 64, 'max' => 84, 'stage' => 'Jungtier', 'info' => 'Vollständig entwöhnt, erste Impfungen fällig'],
-            ['min' => 85, 'max' => 365, 'stage' => 'Heranwachsend', 'info' => 'Regelmäßige Tierarztbesuche, Kastration planen']
+            ['min' => 0,  'max' => 7,   'stage' => 'development.stage.newborn',           'info' => 'development.info.newborn'],
+            ['min' => 8,  'max' => 14,  'stage' => 'development.stage.eyes_opening',     'info' => 'development.info.eyes_opening'],
+            ['min' => 15, 'max' => 21,  'stage' => 'development.stage.hearing_develops', 'info' => 'development.info.hearing_develops'],
+            ['min' => 22, 'max' => 28,  'stage' => 'development.stage.first_steps',       'info' => 'development.info.first_steps'],
+            ['min' => 29, 'max' => 35,  'stage' => 'development.stage.socialization',     'info' => 'development.info.socialization'],
+            ['min' => 36, 'max' => 49,  'stage' => 'development.stage.weaning',           'info' => 'development.info.weaning'],
+            ['min' => 50, 'max' => 63,  'stage' => 'development.stage.independence',      'info' => 'development.info.independence'],
+            ['min' => 64, 'max' => 84,  'stage' => 'development.stage.juvenile',          'info' => 'development.info.juvenile'],
+            ['min' => 85, 'max' => 365, 'stage' => 'development.stage.adolescent',        'info' => 'development.info.adolescent'],
         ];
-        
+
         foreach ($stages as $stage) {
             if ($ageInDays >= $stage['min'] && $ageInDays <= $stage['max']) {
-                return $stage;
+                return [
+                    'stage' => __($stage['stage']),
+                    'info'  => __($stage['info']),
+                ];
             }
         }
-        
-        return ['stage' => 'Erwachsen', 'info' => 'Regelmäßige Gesundheitschecks und Impfungen'];
+
+        return [
+            'stage' => __('development.stage.adult'),
+            'info'  => __('development.info.adult'),
+        ];
     }
     
     public function updateProfileImage($kittenId, $userId, $filename) {

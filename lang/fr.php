@@ -354,6 +354,28 @@ return [
     'statistics.milestones.16.title' => 'La maturité sexuelle approche',
     'statistics.milestones.16.desc' => 'La stérilisation doit être envisagée',
 
+    // Development (dashboard/public current stage)
+    'development.stage.newborn' => 'Nouveau-né',
+    'development.info.newborn' => 'Yeux et oreilles fermés, uniquement lait maternel',
+    'development.stage.eyes_opening' => 'Les yeux commencent à s’ouvrir',
+    'development.info.eyes_opening' => 'Les yeux commencent à s’ouvrir, encore dépendant du lait maternel',
+    'development.stage.hearing_develops' => 'L’ouïe se développe',
+    'development.info.hearing_develops' => 'Les oreilles s’ouvrent, premières tentatives de marche',
+    'development.stage.first_steps' => 'Premiers pas',
+    'development.info.first_steps' => 'Apprentissage de la marche, les jeux commencent',
+    'development.stage.socialization' => 'Socialisation',
+    'development.info.socialization' => 'Phase de socialisation intensive, apprentissage de la litière possible',
+    'development.stage.weaning' => 'Sevrage',
+    'development.info.weaning' => 'Transition vers la nourriture solide, moins de lait maternel',
+    'development.stage.independence' => 'Indépendance',
+    'development.info.independence' => 'Largement autonome, prêt pour de nouvelles familles',
+    'development.stage.juvenile' => 'Jeune',
+    'development.info.juvenile' => 'Complètement sevré, premières vaccinations à prévoir',
+    'development.stage.adolescent' => 'Adolescent',
+    'development.info.adolescent' => 'Visites vétérinaires régulières, planifier la stérilisation',
+    'development.stage.adult' => 'Adulte',
+    'development.info.adult' => 'Bilans de santé réguliers et vaccinations',
+
     // Kittens (add/edit)
     'kittens.archived_hint' => 'Ce chaton est actuellement archivé.',
     'kittens.validation.name_required' => 'Le nom est obligatoire.',
