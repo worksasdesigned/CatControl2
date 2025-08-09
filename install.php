@@ -129,10 +129,6 @@
             $db_name = $_POST['db_name'] ?? $envDbName;
             $db_user = $_POST['db_user'] ?? $envDbUser;
             $db_password = $_POST['db_password'] ?? $envDbPassword;
-            $admin_email = $_POST['admin_email'] ?? $envAdminEmail;
-            $smtp_host = $_POST['smtp_host'] ?? $envSmtpHost;
-            $smtp_username = $_POST['smtp_username'] ?? $envSmtpUsername;
-            $smtp_password = $_POST['smtp_password'] ?? $envSmtpPassword;
             
             $errors = [];
             
@@ -140,9 +136,7 @@
             if (empty($db_password)) {
                 $errors[] = "Datenbankpasswort ist erforderlich";
             }
-            if (empty($admin_email) || !filter_var($admin_email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Gültige Admin-E-Mail-Adresse ist erforderlich";
-            }
+
             
             if (empty($errors)) {
                 try {
@@ -186,7 +180,6 @@
                         
                         // Replace defaults
                         $sql = str_replace("IDENTIFIED BY 'changeme123'", "IDENTIFIED BY '{$db_password}'", $sql);
-                        $sql = str_replace("'admin@localhost'", "'{$admin_email}'", $sql);
                         
                         // Remove statements that require elevated privileges or are redundant
                         $filteredSql = $sql;
@@ -232,15 +225,7 @@ return [
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ],
-    'smtp' => [
-        'host' => '{$smtp_host}',
-        'port' => 587,
-        'username' => '{$smtp_username}',
-        'password' => '{$smtp_password}',
-        'encryption' => 'tls',
-        'from_email' => '{$admin_email}',
-        'from_name' => 'CatControl'
-    ]
+    'smtp' => null
 ];
 ";
                     
@@ -256,60 +241,11 @@ return [
                         }
                     }
                     
-                    // Versuch: PHPMailer automatisch installieren (Composer)
-                    $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Installation übersprungen';
-                    try {
-                        $canShell = function_exists('shell_exec') && stripos((string)ini_get('disable_functions'), 'shell_exec') === false;
-                        $projectRoot = __DIR__;
-                        
-                        if ($canShell) {
-                            // Prüfen, ob bereits vorhanden
-                            if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
-                                // Composer ermitteln oder composer.phar lokal installieren
-                                $composerCmd = trim((string)@shell_exec('command -v composer'));
-                                if (empty($composerCmd)) {
-                                    // Composer-Installer herunterladen
-                                    $installerPath = $projectRoot . '/composer-setup.php';
-                                    $installerCode = @file_get_contents('https://getcomposer.org/installer');
-                                    if ($installerCode !== false) {
-                                        @file_put_contents($installerPath, $installerCode);
-                                        @shell_exec('php ' . escapeshellarg($installerPath) . ' --install-dir=' . escapeshellarg($projectRoot) . ' --filename=composer.phar 2>&1');
-                                        @unlink($installerPath);
-                                        $composerCmd = 'php ' . escapeshellarg($projectRoot . '/composer.phar');
-                                    } else {
-                                        // Fallback via curl (falls erlaubt)
-                                        @shell_exec('curl -sS https://getcomposer.org/installer | php');
-                                        if (file_exists($projectRoot . '/composer.phar')) {
-                                            $composerCmd = 'php ' . escapeshellarg($projectRoot . '/composer.phar');
-                                        }
-                                    }
-                                }
-                                
-                                if (!empty($composerCmd)) {
-                                    chdir($projectRoot);
-                                    @shell_exec($composerCmd . ' require phpmailer/phpmailer:^6.9 --no-interaction --no-dev 2>&1');
-                                }
-                            }
-                            
-                            // Prüfen, ob Installation erfolgreich war
-                            if (file_exists($projectRoot . '/vendor/autoload.php')) {
-                                $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): erfolgreich installiert';
-                            } else {
-                                $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): nicht installiert (Composer nicht verfügbar). Nutzen Sie alternativ die Datei <code>setup_php_mail.php</code>.';
-                            }
-                        } else {
-                            $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Shell-Ausführung deaktiviert. Bitte führen Sie <code>setup_php_mail.php</code> aus oder installieren Sie PHPMailer manuell.';
-                        }
-                    } catch (Throwable $t) {
-                        $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Fehler bei der automatischen Installation: ' . htmlspecialchars($t->getMessage());
-                    }
-                    
                     echo '<div class="success">
                         ✅ <strong>Installation erfolgreich!</strong><br>
                         • Datenbank wurde verbunden' . (!$usersTableExists ? ' und initialisiert' : '') . '<br>
                         • Konfigurationsdatei wurde erstellt<br>
                         • Upload-Verzeichnisse wurden erstellt<br>
-                        ' . $mailerStatusHtml . '<br>
                         • Standard-Admin-Benutzer: admin / katze<br><br>
                         <strong>Wichtig:</strong> Bitte löschen Sie diese install.php Datei aus Sicherheitsgründen!
                     </div>';
@@ -365,31 +301,7 @@ return [
                 </div>
             </div>
             
-            <div class="step">
-                <h3>📧 E-Mail-Konfiguration</h3>
-                
-                <div class="form-group">
-                    <label for="admin_email">Administrator E-Mail:</label>
-                    <input type="email" id="admin_email" name="admin_email" value="<?php echo htmlspecialchars($_POST['admin_email'] ?? $envAdminEmail, ENT_QUOTES); ?>" required>
-                    <small>Diese E-Mail wird für System-Benachrichtigungen verwendet</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="smtp_host">SMTP-Host (für Gmail: smtp.gmail.com):</label>
-                    <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($_POST['smtp_host'] ?? $envSmtpHost, ENT_QUOTES); ?>" placeholder="smtp.gmail.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="smtp_username">SMTP-Benutzername:</label>
-                    <input type="text" id="smtp_username" name="smtp_username" value="<?php echo htmlspecialchars($_POST['smtp_username'] ?? $envSmtpUsername, ENT_QUOTES); ?>" placeholder="ihre-email@gmail.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="smtp_password">SMTP-Passwort (App-Passwort):</label>
-                    <input type="password" id="smtp_password" name="smtp_password" value="<?php echo htmlspecialchars($_POST['smtp_password'] ?? $envSmtpPassword, ENT_QUOTES); ?>">
-                    <small>Für Gmail: Verwenden Sie ein App-Passwort, nicht Ihr normales Passwort</small>
-                </div>
-            </div>
+
             
             <div class="form-group">
                 <button type="submit" name="install" class="btn">🚀 CatControl installieren</button>

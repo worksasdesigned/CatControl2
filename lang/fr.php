@@ -28,6 +28,7 @@ return [
     'login.back_to_login' => 'Retour à la connexion',
     'login.error.fill_all' => 'Veuillez remplir tous les champs',
     'login.forgot.email' => 'Adresse e-mail',
+    'login.forgot_hint' => 'La réinitialisation par e-mail n’est plus disponible. Veuillez ouvrir la page reset-passwort.php pour réinitialiser votre mot de passe avec votre nom d’utilisateur et le nom d’un chaton qui vous est associé.',
 
     // Cookie
     'cookie.text' => 'Ce site utilise des cookies pour vous offrir la meilleure expérience. En continuant, vous acceptez leur utilisation.',
@@ -73,6 +74,11 @@ return [
     'reset_password.new' => 'Nouveau mot de passe',
     'reset_password.confirm' => 'Confirmer le mot de passe',
     'reset_password.change' => 'Changer le mot de passe',
+    'reset_password.username' => 'Nom d’utilisateur',
+    'reset_password.kitten_name' => 'Nom d’un chaton associé',
+    'reset_password.verify' => 'Vérifier et continuer',
+    'reset_password.set_new' => 'Définir un nouveau mot de passe',
+    'reset_password.validation_failed' => 'Utilisateur ou association de chaton introuvable',
 
     // User related
     'user.register.username_taken' => 'Le nom d’utilisateur est déjà pris',

@@ -28,6 +28,7 @@ return [
     'login.back_to_login' => 'Back to sign in',
     'login.error.fill_all' => 'Please fill out all fields',
     'login.forgot.email' => 'Email address',
+    'login.forgot_hint' => 'Email reset is no longer available. Please open the page reset-passwort.php to reset your password using your username and a kitten name you are associated with.',
 
     // Cookie
     'cookie.text' => 'This website uses cookies to give you the best experience. By continuing to use it, you agree to the use of cookies.',
@@ -73,6 +74,11 @@ return [
     'reset_password.new' => 'New password',
     'reset_password.confirm' => 'Confirm password',
     'reset_password.change' => 'Change password',
+    'reset_password.username' => 'Username',
+    'reset_password.kitten_name' => 'Name of an associated kitten',
+    'reset_password.verify' => 'Verify and continue',
+    'reset_password.set_new' => 'Set new password',
+    'reset_password.validation_failed' => 'User or kitten association not found',
 
     // User related
     'user.register.username_taken' => 'Username is already taken',

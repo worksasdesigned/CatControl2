@@ -13,13 +13,5 @@ return [
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ],
-    'smtp' => [
-        'host' => '',
-        'port' => 587,
-        'username' => '',
-        'password' => '',
-        'encryption' => 'tls',
-        'from_email' => 'admin@localhost',
-        'from_name' => 'CatControl'
-    ]
+    'smtp' => null
 ];

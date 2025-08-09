@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__ . '/Database.php';
-require_once __DIR__ . '/EmailService.php';
 
 class User {
     private $db;
@@ -16,8 +15,8 @@ class User {
             return ['success' => false, 'message' => __('user.register.username_taken') ?? 'Benutzername bereits vergeben'];
         }
         
-        // Check if email exists
-        if ($this->getUserByEmail($email)) {
+        // Email optional: Verwende Dummy/Null; Prüfe nur, wenn gesetzt
+        if (!empty($email) && $this->getUserByEmail($email)) {
             return ['success' => false, 'message' => __('user.register.email_taken') ?? 'E-Mail-Adresse bereits registriert'];
         }
         
@@ -28,11 +27,16 @@ class User {
         
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         
+        // Defaults für entfernte Felder
+        $emailToStore = $email ?: ($username . '@local');
+        $countryToStore = $country ?: 'n/a';
+        $cityToStore = $city ?: null;
+        
         $sql = "INSERT INTO users (username, email, password_hash, country, city, allow_messages, first_login) 
                 VALUES (?, ?, ?, ?, ?, ?, 0)";
         
         try {
-            $this->db->execute($sql, [$username, $email, $passwordHash, $country, $city, $allowMessages ? 1 : 0]);
+            $this->db->execute($sql, [$username, $emailToStore, $passwordHash, $countryToStore, $cityToStore, $allowMessages ? 1 : 0]);
             return ['success' => true, 'message' => __('user.register.success') ?? 'Registrierung erfolgreich'];
         } catch (Exception $e) {
             error_log("Registration error: " . $e->getMessage());
@@ -54,7 +58,7 @@ class User {
         
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
-        $_SESSION['email'] = $user['email'];
+        $_SESSION['email'] = $user['email'] ?? null;
         $_SESSION['first_login'] = $user['first_login'];
         
         return ['success' => true, 'user' => $user, 'first_login' => $user['first_login']];
@@ -171,80 +175,34 @@ class User {
         }
     }
     
-    public function requestPasswordReset($email) {
-        $user = $this->getUserByEmail($email);
-        if (!$user) {
-            // Don't reveal if email exists or not
-            return ['success' => true, 'message' => __('email.reset_link_sent') ?? 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
+    // Neues Reset-Verfahren ohne E-Mail-Token
+    public function verifyUserWithKitten(string $username, string $kittenName): ?array {
+        $user = $this->getUserByUsername($username);
+        if (!$user) return null;
+        // Prüfe Besitz oder geteilten Zugriff
+        $sql = "SELECT COUNT(*) AS cnt FROM kittens k WHERE k.name = ? AND (k.owner_id = ? OR k.id IN (SELECT kitten_id FROM kitten_users WHERE user_id = ?))";
+        $row = $this->db->fetch($sql, [$kittenName, $user['id'], $user['id']]);
+        if (!empty($row) && (int)$row['cnt'] > 0) {
+            return $user;
         }
-        
-        // Generate reset token
-        $token = bin2hex(random_bytes(32));
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
-        
-        $sql = "INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)";
-        
-        try {
-            $this->db->execute($sql, [$user['id'], $token, $expiresAt]);
-            
-            // Send email
-            $emailService = new EmailService();
-            $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/reset-password.php?token=" . $token;
-            
-            $subject = "CatControl - Passwort zurücksetzen";
-            $message = "
-                <h2>Passwort zurücksetzen</h2>
-                <p>Hallo {$user['username']},</p>
-                <p>Sie haben eine Passwort-Zurücksetzung für Ihr CatControl-Konto angefordert.</p>
-                <p>Klicken Sie auf den folgenden Link, um Ihr Passwort zurückzusetzen:</p>
-                <p><a href='$resetLink'>Passwort zurücksetzen</a></p>
-                <p>Dieser Link ist 1 Stunde gültig.</p>
-                <p>Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.</p>
-                <br>
-                <p>Ihr CatControl Team</p>
-            ";
-            
-            $emailService->sendEmail($user['email'], $subject, $message);
-            
-            return ['success' => true, 'message' => __('email.reset_link_sent') ?? 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
-        } catch (Exception $e) {
-            error_log("Password reset request error: " . $e->getMessage());
-            return ['success' => false, 'message' => __('email.send_failed') ?? 'Fehler beim Senden der E-Mail'];
-        }
+        return null;
     }
     
-    public function resetPassword($token, $newPassword) {
+    public function setNewPasswordByUsername(string $username, string $newPassword): array {
         if (strlen($newPassword) < 8) {
             return ['success' => false, 'message' => __('user.password.too_short') ?? 'Passwort muss mindestens 8 Zeichen lang sein'];
         }
-        
-        $sql = "SELECT * FROM password_reset_tokens WHERE token = ? AND expires_at > NOW() AND used = 0";
-        $resetToken = $this->db->fetch($sql, [$token]);
-        
-        if (!$resetToken) {
-            return ['success' => false, 'message' => __('user.password.invalid_token') ?? 'Ungültiger oder abgelaufener Token'];
+        $user = $this->getUserByUsername($username);
+        if (!$user) {
+            return ['success' => false, 'message' => __('reset_password.validation_failed') ?? 'Benutzer oder Kätzchenzuordnung nicht gefunden'];
         }
-        
         $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-        
         try {
-            $this->db->beginTransaction();
-            
-            // Update password
-            $sql = "UPDATE users SET password_hash = ? WHERE id = ?";
-            $this->db->execute($sql, [$passwordHash, $resetToken['user_id']]);
-            
-            // Mark token as used
-            $sql = "UPDATE password_reset_tokens SET used = 1 WHERE id = ?";
-            $this->db->execute($sql, [$resetToken['id']]);
-            
-            $this->db->commit();
-            
-            return ['success' => true, 'message' => __('user.password.reset_success') ?? 'Passwort erfolgreich zurückgesetzt'];
+            $this->db->execute("UPDATE users SET password_hash = ?, first_login = 0 WHERE id = ?", [$passwordHash, $user['id']]);
+            return ['success' => true, 'message' => __('user.password.changed') ?? 'Passwort erfolgreich geändert'];
         } catch (Exception $e) {
-            $this->db->rollback();
-            error_log("Password reset error: " . $e->getMessage());
-            return ['success' => false, 'message' => __('user.password.reset_failed') ?? 'Fehler beim Zurücksetzen des Passworts'];
+            error_log('setNewPasswordByUsername error: ' . $e->getMessage());
+            return ['success' => false, 'message' => __('user.password.change_failed') ?? 'Passwort konnte nicht geändert werden'];
         }
     }
     
