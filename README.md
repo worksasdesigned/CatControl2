@@ -464,6 +464,7 @@ Diese README beschreibt die aktuelle Version 1.0. Separate Update-/Upgrade-Hinwe
 ### Standard-Benutzer
 - **Benutzername:** admin
 - **Passwort:** katze (beim ersten Login wird nur für den Benutzer `admin` eine Passwortänderung erzwungen)
+- Warum auch immer hat der Admin ab und zu nicht funktioniert. Da der Admin keine speziellen rechte hat, kann man auch einfach einen neuen user anlegen und den Benutzen.
 
 ### Wichtige Verzeichnisse
 - **Anwendung:** `/var/www/html/catcontrol/`
