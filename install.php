@@ -100,7 +100,7 @@
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $db_host = $_POST['db_host'] ?? 'localhost';
+            $db_host = $_POST['db_host'] ?? 'db';
             $db_name = $_POST['db_name'] ?? 'catcontrol';
             $db_user = $_POST['db_user'] ?? 'phpuser';
             $db_password = $_POST['db_password'] ?? '';
@@ -126,27 +126,68 @@
                         mkdir($config_dir, 0755, true);
                     }
                     
-                    // Test database connection
-                    $dsn = "mysql:host=$db_host;charset=utf8mb4";
-                    $pdo = new PDO($dsn, $db_user, $db_password);
-                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    // Test database connection - prefer TCP and include dbname, with fallback
+                    $dsnWithDb = "mysql:host={$db_host};dbname={$db_name};port=3306;charset=utf8mb4";
+                    $dsnNoDb   = "mysql:host={$db_host};port=3306;charset=utf8mb4";
                     
-                    // Read and execute SQL file
-                    $sql = file_get_contents('database.sql');
-                    if ($sql === false) {
-                        throw new Exception("Kann database.sql nicht lesen");
+                    try {
+                        $pdo = new PDO($dsnWithDb, $db_user, $db_password);
+                        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    } catch (PDOException $primaryException) {
+                        // Fallback: connect without database and try to create/select it
+                        $pdo = new PDO($dsnNoDb, $db_user, $db_password);
+                        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                        try {
+                            $safeDbName = str_replace('`', '``', $db_name);
+                            $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$safeDbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                            $pdo->exec("USE `{$safeDbName}`");
+                        } catch (PDOException $e2) {
+                            // If we cannot create or select the DB, bubble up the original error for clarity
+                            throw $primaryException;
+                        }
                     }
                     
-                    // Replace default password in SQL
-                    $sql = str_replace("IDENTIFIED BY 'changeme123'", "IDENTIFIED BY '$db_password'", $sql);
-                    $sql = str_replace("'admin@localhost'", "'$admin_email'", $sql);
+                    // Check if core table exists; if not, initialize schema
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'users'");
+                    $stmt->execute([$db_name]);
+                    $usersTableExists = (int)$stmt->fetchColumn() > 0;
                     
-                    // Execute SQL statements
-                    $statements = explode(';', $sql);
-                    foreach ($statements as $statement) {
-                        $statement = trim($statement);
-                        if (!empty($statement)) {
-                            $pdo->exec($statement);
+                    if (!$usersTableExists) {
+                        // Read and execute SQL file (filter out user/privilege management statements)
+                        $sql = file_get_contents('database.sql');
+                        if ($sql === false) {
+                            throw new Exception("Kann database.sql nicht lesen");
+                        }
+                        
+                        // Replace defaults
+                        $sql = str_replace("IDENTIFIED BY 'changeme123'", "IDENTIFIED BY '{$db_password}'", $sql);
+                        $sql = str_replace("'admin@localhost'", "'{$admin_email}'", $sql);
+                        
+                        // Remove statements that require elevated privileges or are redundant
+                        $filteredSql = $sql;
+                        $filteredSql = preg_replace('/^\s*CREATE\s+DATABASE[\s\S]*?;\s*$/mi', '', $filteredSql);
+                        $filteredSql = preg_replace('/^\s*USE\s+.+?;\s*$/mi', '', $filteredSql);
+                        $filteredSql = preg_replace('/^\s*CREATE\s+USER[\s\S]*?;\s*$/mi', '', $filteredSql);
+                        $filteredSql = preg_replace('/^\s*GRANT[\s\S]*?;\s*$/mi', '', $filteredSql);
+                        $filteredSql = preg_replace('/^\s*FLUSH\s+PRIVILEGES\s*;\s*$/mi', '', $filteredSql);
+                        
+                        // Execute remaining statements
+                        $statements = explode(';', $filteredSql);
+                        foreach ($statements as $statement) {
+                            $statement = trim($statement);
+                            if ($statement === '') {
+                                continue;
+                            }
+                            try {
+                                $pdo->exec($statement);
+                            } catch (PDOException $e) {
+                                $message = $e->getMessage();
+                                // Ignore idempotency errors like "already exists"
+                                if (preg_match('/already exists|exists/i', $message)) {
+                                    continue;
+                                }
+                                throw $e;
+                            }
                         }
                     }
                     
@@ -156,10 +197,10 @@
 // Generated by install.php on " . date('Y-m-d H:i:s') . "
 
 return [
-    'host' => '$db_host',
-    'database' => '$db_name',
-    'username' => '$db_user',
-    'password' => '$db_password',
+    'host' => '{$db_host}',
+    'database' => '{$db_name}',
+    'username' => '{$db_user}',
+    'password' => '{$db_password}',
     'charset' => 'utf8mb4',
     'options' => [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -167,12 +208,12 @@ return [
         PDO::ATTR_EMULATE_PREPARES => false,
     ],
     'smtp' => [
-        'host' => '$smtp_host',
+        'host' => '{$smtp_host}',
         'port' => 587,
-        'username' => '$smtp_username',
-        'password' => '$smtp_password',
+        'username' => '{$smtp_username}',
+        'password' => '{$smtp_password}',
         'encryption' => 'tls',
-        'from_email' => '$admin_email',
+        'from_email' => '{$admin_email}',
         'from_name' => 'CatControl'
     ]
 ];
@@ -240,7 +281,7 @@ return [
                     
                     echo '<div class="success">
                         ✅ <strong>Installation erfolgreich!</strong><br>
-                        • Datenbank wurde erstellt und initialisiert<br>
+                        • Datenbank wurde verbunden' . (!$usersTableExists ? ' und initialisiert' : '') . '<br>
                         • Konfigurationsdatei wurde erstellt<br>
                         • Upload-Verzeichnisse wurden erstellt<br>
                         ' . $mailerStatusHtml . '<br>
@@ -279,7 +320,7 @@ return [
                 
                 <div class="form-group">
                     <label for="db_host">Datenbank-Host:</label>
-                    <input type="text" id="db_host" name="db_host" value="localhost" required>
+                    <input type="text" id="db_host" name="db_host" value="db" required>
                 </div>
                 
                 <div class="form-group">

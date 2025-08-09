@@ -3,7 +3,7 @@
 // Basic configuration for testing
 
 return [
-    'host' => 'localhost',
+    'host' => 'db',
     'database' => 'catcontrol',
     'username' => 'phpuser',
     'password' => 'changeme123',
