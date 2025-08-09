@@ -2,6 +2,7 @@
 
 CatControl ist eine webbasierte Anwendung zur Verwaltung von jungen Kätzchen, entwickelt für den Einsatz Heimnetzwerken. Das System ermöglicht die Erfassung von Fütterungsdaten, Tierarztbesuchen, Gewichtsstatistiken und vielem mehr.
 <br>Unterstütze Sprachen: Deutsch, Englisch, Französisch
+**Version:** 1.0
 
 <img width="1720" height="864" alt="image" src="https://github.com/user-attachments/assets/a1471571-bc01-40f1-a54b-7b7426f16216" />
 
@@ -94,13 +95,10 @@ sudo chmod 755 /var/www/html/catcontrol
 # In das Webverzeichnis wechseln
 cd /var/www/html/catcontrol
 
-# Projekt herunterladen (ersetzen Sie mit dem tatsächlichen Repository)
-sudo wget https://github.com/IhrRepo/catcontrol/releases/latest/download/catcontrol.zip
-sudo unzip catcontrol.zip
-sudo rm catcontrol.zip
-
-# Oder mit Git:
-# sudo git clone https://github.com/IhrRepo/catcontrol.git .
+# Releasepaket (Version 1.0) auf den Server kopieren und entpacken
+# Beispiel: Datei catcontrol-1.0.zip liegt bereits im aktuellen Verzeichnis
+sudo unzip catcontrol-1.0.zip
+sudo rm catcontrol-1.0.zip
 
 # Berechtigungen setzen
 sudo chown -R www-data:www-data /var/www/html/catcontrol
@@ -193,6 +191,15 @@ MariaDB neu starten:
 ```bash
 sudo systemctl restart mariadb
 ```
+
+Optional: UFW-Regeln für Heimnetz freigeben (Port 3306 nur im LAN):
+```bash
+sudo ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
+sudo ufw allow from 10.0.0.0/8 to any port 3306 proto tcp
+sudo ufw allow from 172.16.0.0/12 to any port 3306 proto tcp
+```
+
+Hinweis (Debian LXC): Das Skript `setup.sh` nimmt diese Anpassungen automatisch vor (bind-address, skip-name-resolve, UFW-Regeln für Port 3306 innerhalb privater Netze).
 
 ### PHP Konfiguration optimieren
 
@@ -448,40 +455,9 @@ Anpassungen:
 </IfModule>
 ```
 
-## 🔄 Updates
+## Version 1.0
 
-### System-Updates
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo systemctl restart apache2 mariadb
-```
-
-### CatControl-Updates
-1. Backup erstellen (siehe Backup-Section)
-2. Neue Version herunterladen
-3. Dateien ersetzen (config-Verzeichnis ausgenommen)
-4. Browser-Cache leeren
-
-### Datenbank-Upgrade (bestehende Installationen)
-
-Führen Sie folgende SQL-Befehle aus, wenn Sie von einer älteren Version aktualisieren:
-
-```sql
--- Nur ausführen, falls Spalte nicht existiert
-ALTER TABLE kittens ADD COLUMN sex ENUM('kater','katze','unbekannt') DEFAULT 'unbekannt';
-
--- Nur ausführen, falls Spalte nicht existiert
-ALTER TABLE kittens ADD COLUMN is_archived BOOLEAN DEFAULT FALSE AFTER is_public;
-
--- Nur ausführen, falls Wert 'gelb' noch nicht im ENUM vorhanden ist
-ALTER TABLE feeding_records MODIFY COLUMN stool_color ENUM('braun','schwarz','orange','rot','grau','gelb','sonstiges');
-
--- Augenstatus Feld ergänzen (falls nicht vorhanden)
-ALTER TABLE feeding_records ADD COLUMN eyes_open BOOLEAN NULL AFTER fitness_level;
-
--- Optional: first_login Default nur für Neuinstallationen ändern
--- (bestehende Tabellen können so bleiben); für Neu-User wird ohnehin 0 gesetzt
-```
+Diese README beschreibt die aktuelle Version 1.0. Separate Update-/Upgrade-Hinweise sind derzeit nicht erforderlich.
 
 ## 📞 Support und Dokumentation
 

@@ -42,7 +42,7 @@ cat << "EOF"
 ██║     ██╔══██║   ██║       ██║     ██║   ██║██║╚██╗██║   ██║   ██╔══██╗██║   ██║██║     
 ╚██████╗██║  ██║   ██║       ╚██████╗╚██████╔╝██║ ╚████║   ██║   ██║  ██║╚██████╔╝███████╗
  ╚═════╝╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
-                                                                                           
+                                                                                            
                     🐱 Kätzchen Verwaltungssystem - Setup Script 🐱
 EOF
 echo -e "${NC}"
@@ -153,6 +153,24 @@ mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
 
 print_success "MariaDB gesichert"
 
+# MariaDB für Heimnetzwerk freigeben
+print_status "MariaDB für Heimnetzwerk freigeben..."
+CONFIG_FILE="/etc/mysql/mariadb.conf.d/50-server.cnf"
+if [ -f "$CONFIG_FILE" ]; then
+  cp -n "$CONFIG_FILE" "${CONFIG_FILE}.bak" || true
+  if grep -q "^[#[:space:]]*bind-address" "$CONFIG_FILE"; then
+    sed -i "s/^[#[:space:]]*bind-address.*/bind-address = 0.0.0.0/" "$CONFIG_FILE"
+  else
+    awk '1; $0 ~ /^\[mysqld\]/ && !done {print "bind-address = 0.0.0.0"; done=1}' "$CONFIG_FILE" > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
+  fi
+  if ! grep -q "^[#[:space:]]*skip-name-resolve" "$CONFIG_FILE"; then
+    echo "skip-name-resolve = 1" >> "$CONFIG_FILE"
+  fi
+fi
+
+systemctl restart mariadb
+print_success "MariaDB für Netzwerkzugriff konfiguriert"
+
 print_status "=== Schritt 8: Virtual Host konfigurieren ==="
 
 # Apache Virtual Host erstellen
@@ -194,6 +212,10 @@ ufw default deny incoming
 ufw default allow outgoing
 ufw allow ssh
 ufw allow 'Apache Full'
+# MariaDB-Port nur für private Netze im Heimnetz freigeben
+ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
+ufw allow from 10.0.0.0/8 to any port 3306 proto tcp
+ufw allow from 172.16.0.0/12 to any port 3306 proto tcp
 ufw --force enable
 
 print_success "Firewall konfiguriert"
@@ -242,8 +264,8 @@ mkdir -p $BACKUP_DIR
 # Config-Datei für DB-Passwort lesen
 if [ -f "/var/www/html/catcontrol/config/database.php" ]; then
     DB_PASS=$(php -r "
-    \$config = include '/var/www/html/catcontrol/config/database.php';
-    echo \$config['password'];
+    $config = include '/var/www/html/catcontrol/config/database.php';
+    echo $config['password'];
     ")
     
     # Datenbank-Backup
@@ -335,6 +357,7 @@ echo -e "${BLUE}Server-Informationen:${NC}"
 echo "• Web-Verzeichnis: $WEBROOT"
 echo "• Backup-Verzeichnis: $BACKUP_DIR"
 echo "• Log-Dateien: /var/log/apache2/"
+echo "• MariaDB-LAN-Zugriff: Port 3306 erlaubt aus 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12"
 echo
 echo -e "${BLUE}Nächste Schritte:${NC}"
 echo "1. CatControl-Dateien nach $WEBROOT kopieren"
