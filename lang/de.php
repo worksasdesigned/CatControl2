@@ -354,6 +354,28 @@ return [
     'statistics.milestones.16.title' => 'Geschlechtsreife nähert sich',
     'statistics.milestones.16.desc' => 'Kastration sollte erwogen werden',
 
+    // Development (dashboard/public current stage)
+    'development.stage.newborn' => 'Neugeborenes',
+    'development.info.newborn' => 'Augen und Ohren geschlossen, nur Muttermilch',
+    'development.stage.eyes_opening' => 'Augen öffnen sich',
+    'development.info.eyes_opening' => 'Augen beginnen sich zu öffnen, noch auf Muttermilch angewiesen',
+    'development.stage.hearing_develops' => 'Hören entwickelt sich',
+    'development.info.hearing_develops' => 'Ohren öffnen sich, erste Gehversuche',
+    'development.stage.first_steps' => 'Erste Schritte',
+    'development.info.first_steps' => 'Laufen lernen, Spielverhalten beginnt',
+    'development.stage.socialization' => 'Sozialisierung',
+    'development.info.socialization' => 'Intensive Sozialisierungsphase, Katzenklo-Training möglich',
+    'development.stage.weaning' => 'Entwöhnung',
+    'development.info.weaning' => 'Übergang zu festem Futter, weniger Muttermilch',
+    'development.stage.independence' => 'Selbstständigkeit',
+    'development.info.independence' => 'Weitgehend selbstständig, bereit für neue Familien',
+    'development.stage.juvenile' => 'Jungtier',
+    'development.info.juvenile' => 'Vollständig entwöhnt, erste Impfungen fällig',
+    'development.stage.adolescent' => 'Heranwachsend',
+    'development.info.adolescent' => 'Regelmäßige Tierarztbesuche, Kastration planen',
+    'development.stage.adult' => 'Erwachsen',
+    'development.info.adult' => 'Regelmäßige Gesundheitschecks und Impfungen',
+ 
     // Kittens (add/edit)
     'kittens.archived_hint' => 'Dieses Kätzchen ist aktuell archiviert.',
     'kittens.validation.name_required' => 'Name ist ein Pflichtfeld.',
