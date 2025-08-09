@@ -629,9 +629,9 @@ if (!empty($currentUser['custom_background'])) {
                     return fetch(`ajax/share-kitten.php?kitten_id=${currentShareKittenId}`)
                         .then(r => r.text())
                         .then(html => { document.getElementById('shareContent').innerHTML = html; });
-                } else {
-                    alert(data.message || 'Fehler beim Entfernen');
-                }
+                                        } else {
+                            alert(data.message || '<?= __('errors.unshare') ?>');
+                        }
             }).catch(() => alert('<?= __('errors.unshare') ?>'));
         }
 

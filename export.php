@@ -59,7 +59,7 @@ function createCSV($data, $headers) {
 // Function to create plain text file
 function createTextFile($data, $title) {
     $text = "=== $title ===\n";
-    $text .= "Erstellt am: " . date('d.m.Y H:i:s') . "\n\n";
+    $text .= __('export.created_at') . ': ' . date('d.m.Y H:i:s') . "\n\n";
     
     foreach ($data as $entry) {
         foreach ($entry as $key => $value) {
@@ -111,7 +111,7 @@ function generateWeightChart($feedingData, $kittenName) {
     $svg .= '<rect width="' . $width . '" height="' . $height . '" fill="#f8f9fa"/>';
     
     // Title
-    $svg .= '<text x="' . ($width/2) . '" y="30" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#333">Gewichtsverlauf - ' . htmlspecialchars($kittenName) . '</text>';
+    $svg .= '<text x="' . ($width/2) . '" y="30" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#333">' . htmlspecialchars(__('statistics.chart.title')) . ' - ' . htmlspecialchars($kittenName) . '</text>';
     
     // Chart area
     $svg .= '<rect x="' . $margin . '" y="' . $margin . '" width="' . $chartWidth . '" height="' . $chartHeight . '" fill="white" stroke="#ddd"/>';
@@ -154,8 +154,8 @@ function generateWeightChart($feedingData, $kittenName) {
     $svg .= '<polyline points="' . $points . '" fill="none" stroke="#667eea" stroke-width="2"/>';
     
     // Axis labels
-    $svg .= '<text x="' . ($width/2) . '" y="' . ($height - 5) . '" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Datum</text>';
-    $svg .= '<text x="15" y="' . ($height/2) . '" text-anchor="middle" font-family="Arial" font-size="14" fill="#333" transform="rotate(-90 15 ' . ($height/2) . ')">Gewicht (g)</text>';
+    $svg .= '<text x="' . ($width/2) . '" y="' . ($height - 5) . '" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">' . htmlspecialchars(__('statistics.axis.date')) . '</text>';
+    $svg .= '<text x="15" y="' . ($height/2) . '" text-anchor="middle" font-family="Arial" font-size="14" fill="#333" transform="rotate(-90 15 ' . ($height/2) . ')">' . htmlspecialchars(__('statistics.axis.weight')) . '</text>';
     
     $svg .= '</svg>';
     
@@ -210,9 +210,9 @@ if (isset($_POST['export_data'])) {
         // Create CSV files
         if (!empty($feedingRecords)) {
             $feedingHeaders = [
-                'Datum/Zeit', 'Gewicht (g)', 'Futtermenge (g)', 'Futterart',
-                'Wärmeflasche nachgefüllt', 'Stuhlgang Art', 'Stuhlgang Konsistenz',
-                'Stuhlgang Farbe', 'Stuhlgang Farbe (Sonstiges)', 'Fitness Level', 'Bemerkungen'
+                __('export.csv.feeding.headers.date_time'), __('export.csv.feeding.headers.weight'), __('export.csv.feeding.headers.food_amount'), __('export.csv.feeding.headers.food_type'),
+                __('export.csv.feeding.headers.heat_bottle'), __('export.csv.feeding.headers.stool_type'), __('export.csv.feeding.headers.stool_consistency'),
+                __('export.csv.feeding.headers.stool_color'), __('export.csv.feeding.headers.stool_color_other'), __('export.csv.feeding.headers.fitness'), __('export.csv.feeding.headers.notes')
             ];
             
             $feedingData = [];
@@ -222,7 +222,7 @@ if (isset($_POST['export_data'])) {
                     $record['weight_grams'] ?: '',
                     $record['food_amount_grams'] ?: '',
                     $record['food_type'] ?: '',
-                    $record['heating_pad_refilled'] ? 'Ja' : 'Nein',
+                    $record['heating_pad_refilled'] ? __('common.yes') : __('common.no'),
                     $record['stool_type'] ?: '',
                     $record['stool_consistency'] ?: '',
                     $record['stool_color'] ?: '',
@@ -232,16 +232,16 @@ if (isset($_POST['export_data'])) {
                 ];
             }
             
-            file_put_contents($tempDir . '/fuetterungsdaten.csv', createCSV($feedingData, $feedingHeaders));
-            file_put_contents($tempDir . '/fuetterungsdaten.txt', createTextFile($feedingData, 'Fütterungsdaten - ' . $kitten['name']));
+            file_put_contents($tempDir . '/' . __('export.files.feeding_csv_name'), createCSV($feedingData, $feedingHeaders));
+            file_put_contents($tempDir . '/' . __('export.files.feeding_txt_name'), createTextFile($feedingData, __('feeding.title') . ' - ' . $kitten['name']));
         }
         
         if (!empty($vetRecords)) {
             $vetHeaders = [
-                'Besuchsdatum', 'Tierarzt', 'Befund', 'Impfung',
-                'Nächste Impfung', 'Entwurmung', 'Entwurmung Medikament',
-                'Nächste Entwurmung', 'Zeckenschutz', 'Zeckenschutz Medikament',
-                'Nächster Zeckenschutz', 'Nächster Besuch', 'Kosten (EUR)'
+                __('export.csv.vet.headers.visit_date'), __('export.csv.vet.headers.veterinarian'), __('export.csv.vet.headers.diagnosis'), __('export.csv.vet.headers.vaccination'),
+                __('export.csv.vet.headers.next_vaccination'), __('export.csv.vet.headers.deworming'), __('export.csv.vet.headers.deworming_med'),
+                __('export.csv.vet.headers.next_deworming'), __('export.csv.vet.headers.tick_protection'), __('export.csv.vet.headers.tick_protection_med'),
+                __('export.csv.vet.headers.next_tick_protection'), __('export.csv.vet.headers.next_visit'), __('export.csv.vet.headers.cost_eur')
             ];
             
             $vetData = [];
@@ -252,10 +252,10 @@ if (isset($_POST['export_data'])) {
                     $record['diagnosis'] ?: '',
                     $record['vaccination'] ?: '',
                     $record['next_vaccination_date'] ? date('d.m.Y', strtotime($record['next_vaccination_date'])) : '',
-                    $record['deworming'] ? 'Ja' : 'Nein',
+                    $record['deworming'] ? __('common.yes') : __('common.no'),
                     $record['deworming_medication'] ?: '',
                     $record['next_deworming_interval'] ?: '',
-                    $record['tick_protection'] ? 'Ja' : 'Nein',
+                    $record['tick_protection'] ? __('common.yes') : __('common.no'),
                     $record['tick_protection_medication'] ?: '',
                     $record['next_tick_protection_interval'] ?: '',
                     $record['next_visit_date'] ? date('d.m.Y', strtotime($record['next_visit_date'])) : '',
@@ -263,21 +263,21 @@ if (isset($_POST['export_data'])) {
                 ];
             }
             
-            file_put_contents($tempDir . '/tierarztbesuche.csv', createCSV($vetData, $vetHeaders));
-            file_put_contents($tempDir . '/tierarztbesuche.txt', createTextFile($vetData, 'Tierarztbesuche - ' . $kitten['name']));
+            file_put_contents($tempDir . '/' . __('export.files.vet_csv_name'), createCSV($vetData, $vetHeaders));
+            file_put_contents($tempDir . '/' . __('export.files.vet_txt_name'), createTextFile($vetData, __('vet.table.title') . ' - ' . $kitten['name']));
         }
         
         // Create weight chart
         if (!empty($feedingRecords)) {
             $chartSVG = generateWeightChart($feedingRecords, $kitten['name']);
             if ($chartSVG) {
-                file_put_contents($tempDir . '/gewichtsverlauf.svg', $chartSVG);
+                file_put_contents($tempDir . '/' . __('export.files.weight_svg_name'), $chartSVG);
             }
         }
         
         // Copy images
         if (!empty($images)) {
-            $imageDir = $tempDir . '/bilder';
+            $imageDir = $tempDir . '/' . __('export.files.images_dir');
             mkdir($imageDir, 0755, true);
             
             foreach ($images as $image) {
@@ -293,18 +293,18 @@ if (isset($_POST['export_data'])) {
         }
         
         // Create info file
-        $infoText = "=== EXPORT INFORMATIONEN ===\n";
-        $infoText .= "Kätzchen: " . $kitten['name'] . "\n";
-        $infoText .= "Geburtsdatum: " . date('d.m.Y', strtotime($kitten['birth_date'])) . "\n";
-        $infoText .= "Farbe: " . ($kitten['color'] ?: 'Nicht angegeben') . "\n";
-        $infoText .= "Mutter: " . ($kitten['mother'] ?: 'Nicht angegeben') . "\n";
-        $infoText .= "Fundort: " . ($kitten['found_location'] ?: 'Nicht angegeben') . "\n";
-        $infoText .= "Export erstellt am: " . date('d.m.Y H:i:s') . "\n\n";
+        $infoText = __('export.info.title') . "\n";
+        $infoText .= __('export.info.kitten') . ': ' . $kitten['name'] . "\n";
+        $infoText .= __('export.info.birth_date') . ': ' . date('d.m.Y', strtotime($kitten['birth_date'])) . "\n";
+        $infoText .= __('export.info.color') . ': ' . ($kitten['color'] ?: __('common.not_specified')) . "\n";
+        $infoText .= __('export.info.mother') . ': ' . ($kitten['mother'] ?: __('common.not_specified')) . "\n";
+        $infoText .= __('export.info.found_location') . ': ' . ($kitten['found_location'] ?: __('common.not_specified')) . "\n";
+        $infoText .= __('export.info.export_created_at') . ': ' . date('d.m.Y H:i:s') . "\n\n";
         
-        $infoText .= "=== STATISTIKEN ===\n";
-        $infoText .= "Anzahl Fütterungseinträge: " . count($feedingRecords) . "\n";
-        $infoText .= "Anzahl Tierarztbesuche: " . count($vetRecords) . "\n";
-        $infoText .= "Anzahl Bilder: " . count($images) . "\n\n";
+        $infoText .= __('export.info.stats.title') . "\n";
+        $infoText .= __('export.info.count.feedings') . ': ' . count($feedingRecords) . "\n";
+        $infoText .= __('export.info.count.vet') . ': ' . count($vetRecords) . "\n";
+        $infoText .= __('export.info.count.images') . ': ' . count($images) . "\n\n";
         
         if (!empty($feedingRecords)) {
             $weights = array_filter(array_column($feedingRecords, 'weight_grams'));
@@ -313,15 +313,15 @@ if (isset($_POST['export_data'])) {
                 $lastWeight = end($weights);
                 $weightGain = $lastWeight - $firstWeight;
                 
-                $infoText .= "=== GEWICHTSENTWICKLUNG ===\n";
-                $infoText .= "Erstes Gewicht: " . $firstWeight . "g\n";
-                $infoText .= "Letztes Gewicht: " . $lastWeight . "g\n";
-                $infoText .= "Gewichtszunahme: " . $weightGain . "g\n";
-                $infoText .= "Anzahl Wiegungen: " . count($weights) . "\n\n";
+                $infoText .= __('export.info.weight.title') . "\n";
+                $infoText .= __('export.info.first_weight') . ': ' . $firstWeight . "g\n";
+                $infoText .= __('export.info.last_weight') . ': ' . $lastWeight . "g\n";
+                $infoText .= __('export.info.gain') . ': ' . $weightGain . "g\n";
+                $infoText .= __('export.info.measurements') . ': ' . count($weights) . "\n\n";
             }
         }
         
-        file_put_contents($tempDir . '/export_info.txt', $infoText);
+        file_put_contents($tempDir . '/' . __('export.files.info_txt_name'), $infoText);
         
         // Create ZIP file
         $zipName = 'catcontrol_export_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $kitten['name']) . '_' . date('Y-m-d') . '.zip';
@@ -329,7 +329,7 @@ if (isset($_POST['export_data'])) {
         
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE) !== TRUE) {
-            throw new Exception('Kann ZIP-Datei nicht erstellen');
+            throw new Exception(__('export.error.cannot_create_zip'));
         }
         
         // Add all files to ZIP
@@ -372,7 +372,7 @@ if (isset($_POST['export_data'])) {
         exit;
         
     } catch (Exception $e) {
-        $error = 'Fehler beim Export: ' . $e->getMessage();
+        $error = __('export.error.generic', ['message' => $e->getMessage()]);
     }
 }
 
@@ -391,7 +391,7 @@ if (!empty($currentUser['custom_background'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= __('app.name') ?> - Daten Export - <?= htmlspecialchars($kitten['name']) ?></title>
+    <title><?= __('app.name') ?> - <?= __('export.title') ?> - <?= htmlspecialchars($kitten['name']) ?></title>
     <style>
         * {
             margin: 0;
@@ -610,8 +610,8 @@ if (!empty($currentUser['custom_background'])) {
             <a href="dashboard.php" class="back-button">← <?= __('menu.back_to_dashboard') ?></a>
             
             <div class="header">
-                <h1>📦 Daten Export</h1>
-                <p>Kätzchen: <?= htmlspecialchars($kitten['name']) ?></p>
+                <h1>📦 <?= __('export.header.title') ?></h1>
+                <p><?= __('export.header.kitten_label') ?>: <?= htmlspecialchars($kitten['name']) ?></p>
             </div>
             
             <?php if (isset($error)): ?>
@@ -621,54 +621,54 @@ if (!empty($currentUser['custom_background'])) {
             <?php endif; ?>
             
             <div class="export-section">
-                <h2>📊 Vollständiger Datenexport</h2>
+                <h2>📊 <?= __('export.section.full_export') ?></h2>
                 
                 <div class="kitten-info">
                     <div class="info-card">
-                        <h4>🐱 Kätzchen Information</h4>
-                        <p><strong>Name:</strong> <?= htmlspecialchars($kitten['name']) ?></p>
-                        <p><strong>Geburtsdatum:</strong> <?= date('d.m.Y', strtotime($kitten['birth_date'])) ?></p>
-                        <p><strong>Alter:</strong> 
+                        <h4>🐱 <?= __('export.kitten_info.title') ?></h4>
+                        <p><strong><?= __('export.kitten_info.name') ?>:</strong> <?= htmlspecialchars($kitten['name']) ?></p>
+                        <p><strong><?= __('export.kitten_info.birth_date') ?>:</strong> <?= date('d.m.Y', strtotime($kitten['birth_date'])) ?></p>
+                        <p><strong><?= __('export.kitten_info.age') ?>:</strong> 
                             <?php
                                 $birth = new DateTime($kitten['birth_date']);
                                 $now = new DateTime();
                                 $diff = $now->diff($birth);
-                                echo $diff->days . ' Tage (' . floor($diff->days / 7) . ' Wochen)';
+                                echo __('export.kitten_info.age_format', ['days' => $diff->days, 'weeks' => floor($diff->days / 7)]);
                             ?>
                         </p>
                     </div>
                     
                     <div class="info-card">
-                        <h4>📋 Weitere Details</h4>
-                        <p><strong>Farbe:</strong> <?= htmlspecialchars($kitten['color'] ?: 'Nicht angegeben') ?></p>
-                        <p><strong>Mutter:</strong> <?= htmlspecialchars($kitten['mother'] ?: 'Nicht angegeben') ?></p>
-                        <p><strong>Fundort:</strong> <?= htmlspecialchars($kitten['found_location'] ?: 'Nicht angegeben') ?></p>
+                        <h4>📋 <?= __('export.more_details.title') ?></h4>
+                        <p><strong><?= __('export.more_details.color') ?>:</strong> <?= htmlspecialchars($kitten['color'] ?: __('common.not_specified')) ?></p>
+                        <p><strong><?= __('export.more_details.mother') ?>:</strong> <?= htmlspecialchars($kitten['mother'] ?: __('common.not_specified')) ?></p>
+                        <p><strong><?= __('export.more_details.found_location') ?>:</strong> <?= htmlspecialchars($kitten['found_location'] ?: __('common.not_specified')) ?></p>
                     </div>
                 </div>
                 
                 <div class="export-info">
-                    <h3>📋 Was wird exportiert?</h3>
+                    <h3>📋 <?= __('export.what_exported.title') ?></h3>
                     <ul>
-                        <li>Alle Fütterungsdaten als CSV und Textdatei</li>
-                        <li>Alle Tierarztbesuche als CSV und Textdatei</li>
-                        <li>Gewichtsstatistik als SVG-Diagramm</li>
-                        <li>Alle hochgeladenen Bilder in Originalauflösung</li>
-                        <li>Zusammenfassung und Statistiken als Textdatei</li>
-                        <li>Alles verpackt in einer ZIP-Datei zum Download</li>
+                        <li><?= __('export.what_exported.feeding') ?></li>
+                        <li><?= __('export.what_exported.vet') ?></li>
+                        <li><?= __('export.what_exported.weight_svg') ?></li>
+                        <li><?= __('export.what_exported.images') ?></li>
+                        <li><?= __('export.what_exported.summary') ?></li>
+                        <li><?= __('export.what_exported.zip') ?></li>
                     </ul>
                 </div>
                 
                 <div class="warning">
-                    <h4>⚠️ Hinweise zum Export:</h4>
-                    <p>• Der Export kann je nach Datenmenge einige Sekunden dauern</p>
-                    <p>• CSV-Dateien können in Excel geöffnet werden (Semikolon als Trennzeichen)</p>
-                    <p>• Die ZIP-Datei wird automatisch heruntergeladen</p>
-                    <p>• Alle Daten werden in deutscher Formatierung exportiert</p>
+                    <h4>⚠️ <?= __('export.warning.title') ?></h4>
+                    <p>• <?= __('export.warning.line1') ?></p>
+                    <p>• <?= __('export.warning.line2') ?></p>
+                    <p>• <?= __('export.warning.line3') ?></p>
+                    <p>• <?= __('export.warning.line4') ?></p>
                 </div>
                 
                 <form method="POST">
                     <button type="submit" name="export_data" class="export-button">
-                        📦 Vollständigen Export starten
+                        📦 <?= __('export.button.start') ?>
                     </button>
                 </form>
             </div>

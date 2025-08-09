@@ -117,25 +117,25 @@ function getKittenMilestones($birthDate) {
     $ageInWeeks = floor($ageInDays / 7);
     
     $milestones = [
-        ['week' => 1, 'milestone' => 'Augen beginnen sich zu öffnen', 'description' => 'Die Kätzchen sind noch blind und taub'],
-        ['week' => 2, 'milestone' => 'Augen vollständig geöffnet', 'description' => 'Gehör entwickelt sich, erste Bewegungen'],
-        ['week' => 3, 'milestone' => 'Erste Gehversuche', 'description' => 'Kätzchen beginnen zu laufen und zu spielen'],
-        ['week' => 4, 'milestone' => 'Zähne kommen durch', 'description' => 'Erste Milchzähne, beginnen feste Nahrung zu probieren'],
-        ['week' => 5, 'milestone' => 'Sozialisierung beginnt', 'description' => 'Spielen mit Geschwistern, lernen von der Mutter'],
-        ['week' => 6, 'milestone' => 'Entwöhnung startet', 'description' => 'Weniger Muttermilch, mehr feste Nahrung'],
-        ['week' => 8, 'milestone' => 'Bereit für neues Zuhause', 'description' => 'Vollständig entwöhnt, sozialisiert'],
-        ['week' => 12, 'milestone' => 'Erste Impfungen', 'description' => 'Grundimmunisierung sollte beginnen'],
-        ['week' => 16, 'milestone' => 'Geschlechtsreife nähert sich', 'description' => 'Kastration sollte erwogen werden']
+        ['week' => 1, 'milestone' => __('statistics.milestones.1.title'), 'description' => __('statistics.milestones.1.desc')],
+        ['week' => 2, 'milestone' => __('statistics.milestones.2.title'), 'description' => __('statistics.milestones.2.desc')],
+        ['week' => 3, 'milestone' => __('statistics.milestones.3.title'), 'description' => __('statistics.milestones.3.desc')],
+        ['week' => 4, 'milestone' => __('statistics.milestones.4.title'), 'description' => __('statistics.milestones.4.desc')],
+        ['week' => 5, 'milestone' => __('statistics.milestones.5.title'), 'description' => __('statistics.milestones.5.desc')],
+        ['week' => 6, 'milestone' => __('statistics.milestones.6.title'), 'description' => __('statistics.milestones.6.desc')],
+        ['week' => 8, 'milestone' => __('statistics.milestones.8.title'), 'description' => __('statistics.milestones.8.desc')],
+        ['week' => 12, 'milestone' => __('statistics.milestones.12.title'), 'description' => __('statistics.milestones.12.desc')],
+        ['week' => 16, 'milestone' => __('statistics.milestones.16.title'), 'description' => __('statistics.milestones.16.desc')]
     ];
     
     return [
         'age_days' => $ageInDays,
         'age_weeks' => $ageInWeeks,
         'milestones' => $milestones,
-        'current_phase' => $ageInWeeks <= 2 ? 'Neugeborenes' : 
-                          ($ageInWeeks <= 4 ? 'Entwicklung der Sinne' :
-                          ($ageInWeeks <= 8 ? 'Sozialisierung' : 
-                          ($ageInWeeks <= 16 ? 'Jungtier' : 'Heranwachsend')))
+        'current_phase' => $ageInWeeks <= 2 ? __('statistics.phase.newborn') : 
+                          ($ageInWeeks <= 4 ? __('statistics.phase.senses') :
+                          ($ageInWeeks <= 8 ? __('statistics.phase.socialization') : 
+                          ($ageInWeeks <= 16 ? __('statistics.phase.juvenile') : __('statistics.phase.adolescent'))))
     ];
 }
 
@@ -156,7 +156,7 @@ if (!empty($currentUser['custom_background'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= __('app.name') ?> - Gewichtsstatistik - <?= htmlspecialchars($kitten['name']) ?></title>
+    <title><?= __('app.name') ?> - <?= __('statistics.title') ?> - <?= htmlspecialchars($kitten['name']) ?></title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
@@ -436,59 +436,59 @@ if (!empty($currentUser['custom_background'])) {
             <a href="dashboard.php" class="back-button">← <?= __('menu.back_to_dashboard') ?></a>
             
             <div class="header">
-                <h1>📊 Gewichtsstatistik</h1>
-                <p>Kätzchen: <?= htmlspecialchars($kitten['name']) ?></p>
+                <h1>📊 <?= __('statistics.title') ?></h1>
+                <p><?= __('export.header.kitten_label') ?>: <?= htmlspecialchars($kitten['name']) ?></p>
             </div>
             
             <?php if (empty($weightData)): ?>
                 <div class="no-data">
-                    <h3>📊 Noch keine Gewichtsdaten vorhanden</h3>
-                    <p>Beginnen Sie mit der Erfassung von Fütterungsdaten, um die Gewichtsentwicklung zu verfolgen.</p>
-                    <a href="feeding.php?kitten_id=<?= $kitten_id ?>">Erste Fütterung erfassen</a>
+                    <h3>📊 <?= __('statistics.no_data.title') ?></h3>
+                    <p><?= __('statistics.no_data.text') ?></p>
+                    <a href="feeding.php?kitten_id=<?= $kitten_id ?>"><?= __('statistics.no_data.cta') ?></a>
                 </div>
             <?php else: ?>
                 <!-- Statistics Cards -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <h3>⚖️ Aktuelle Gewichtszunahme</h3>
+                        <h3>⚖️ <?= __('statistics.cards.weight_gain.title') ?></h3>
                         <div class="stat-value"><?= $statistics['weight_gain'] ?>g</div>
-                        <div class="stat-label">seit Beginn der Aufzeichnung</div>
+                        <div class="stat-label"><?= __('statistics.cards.weight_gain.subtitle') ?></div>
                     </div>
                     
                     <div class="stat-card">
-                        <h3>📈 Gewichtszunahme pro Woche</h3>
+                        <h3>📈 <?= __('statistics.cards.per_week.title') ?></h3>
                         <div class="stat-value"><?= $statistics['weight_gain_per_week'] ?>g</div>
-                        <div class="stat-label">durchschnittlich</div>
+                        <div class="stat-label"><?= __('statistics.cards.per_week.subtitle') ?></div>
                     </div>
                     
                     <div class="stat-card">
-                        <h3>📏 Anzahl Messungen</h3>
+                        <h3>📏 <?= __('statistics.cards.measurements.title') ?></h3>
                         <div class="stat-value"><?= $statistics['measurement_count'] ?></div>
-                        <div class="stat-label">über <?= $statistics['days_tracked'] ?> Tage</div>
+                        <div class="stat-label"><?= __('statistics.cards.measurements.subtitle', ['days' => $statistics['days_tracked']]) ?></div>
                     </div>
                     
                     <div class="stat-card">
-                        <h3>🎯 Durchschnittsgewicht</h3>
+                        <h3>🎯 <?= __('statistics.cards.avg_weight.title') ?></h3>
                         <div class="stat-value"><?= $statistics['avg_weight'] ?>g</div>
-                        <div class="stat-label">über den gesamten Zeitraum</div>
+                        <div class="stat-label"><?= __('statistics.cards.avg_weight.subtitle') ?></div>
                     </div>
                     
                     <div class="stat-card">
-                        <h3>🏃 Tägliche Zunahme</h3>
+                        <h3>🏃 <?= __('statistics.cards.daily_gain.title') ?></h3>
                         <div class="stat-value"><?= $statistics['daily_gain'] ?>g</div>
-                        <div class="stat-label">pro Tag im Durchschnitt</div>
+                        <div class="stat-label"><?= __('statistics.cards.daily_gain.subtitle') ?></div>
                     </div>
                     
                     <div class="stat-card">
-                        <h3>📊 Gewichtsspanne</h3>
+                        <h3>📊 <?= __('statistics.cards.range.title') ?></h3>
                         <div class="stat-value"><?= $statistics['first_weight'] ?>g - <?= $statistics['last_weight'] ?>g</div>
-                        <div class="stat-label">von <?= date('d.m.Y', strtotime($weightData[0]['feeding_date'])) ?> bis <?= date('d.m.Y', strtotime(end($weightData)['feeding_date'])) ?></div>
+                        <div class="stat-label"><?= __('statistics.cards.range.subtitle', ['from' => date('d.m.Y', strtotime($weightData[0]['feeding_date'])), 'to' => date('d.m.Y', strtotime(end($weightData)['feeding_date']))]) ?></div>
                     </div>
                 </div>
                 
                 <!-- Weight Chart -->
                 <div class="chart-container">
-                    <h2>📈 Gewichtsverlauf</h2>
+                    <h2>📈 <?= __('statistics.chart.title') ?></h2>
                     <div class="chart-wrapper">
                         <canvas id="weightChart"></canvas>
                     </div>
@@ -497,11 +497,11 @@ if (!empty($currentUser['custom_background'])) {
             
             <!-- Development Milestones -->
             <div class="development-section">
-                <h2>🌱 Entwicklungsphasen</h2>
+                <h2>🌱 <?= __('statistics.development.title') ?></h2>
                 
                 <div class="age-info">
-                    <h3>Aktuelles Alter: <?= $developmentInfo['age_days'] ?> Tage (<?= $developmentInfo['age_weeks'] ?> Wochen)</h3>
-                    <p><strong>Aktuelle Phase:</strong> <?= $developmentInfo['current_phase'] ?></p>
+                    <h3><?= __('statistics.development.current_age', ['days' => $developmentInfo['age_days'], 'weeks' => $developmentInfo['age_weeks']]) ?></h3>
+                    <p><strong><?= __('statistics.development.current_phase') ?></strong> <?= $developmentInfo['current_phase'] ?></p>
                 </div>
                 
                 <div class="milestones">
@@ -514,11 +514,11 @@ if (!empty($currentUser['custom_background'])) {
                                 $status = 'current';
                             }
                         ?>
-                        <div class="milestone <?= $status ?>">
-                            <div class="week-badge">Woche <?= $milestone['week'] ?></div>
-                            <h4><?= $milestone['milestone'] ?></h4>
-                            <p><?= $milestone['description'] ?></p>
-                        </div>
+                                                    <div class="milestone <?= $status ?>">
+                                <div class="week-badge"><?= __('statistics.development.week_label', ['week' => $milestone['week']]) ?></div>
+                                <h4><?= $milestone['milestone'] ?></h4>
+                                <p><?= $milestone['description'] ?></p>
+                            </div>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -531,7 +531,7 @@ if (!empty($currentUser['custom_background'])) {
         const weightData = <?= json_encode($weightData) ?>;
         const chartData = weightData.map(record => ({
             x: record.feeding_date,
-            y: parseInt(record.weight_grams)
+            y: Number(record.weight_grams)
         }));
         
         // Create weight chart
@@ -540,7 +540,7 @@ if (!empty($currentUser['custom_background'])) {
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'Gewicht (g)',
+                    label: <?= json_encode(__('statistics.axis.weight')) ?>,
                     data: chartData,
                     borderColor: '#667eea',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
@@ -565,32 +565,36 @@ if (!empty($currentUser['custom_background'])) {
                     intersect: false,
                     mode: 'index'
                 },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        borderColor: '#667eea',
-                        borderWidth: 1,
-                        callbacks: {
-                            title: function(context) {
-                                const date = new Date(context[0].parsed.x);
-                                return date.toLocaleDateString('de-DE', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                });
+                                        plugins: {
+                            legend: {
+                                display: false
                             },
-                            label: function(context) {
-                                return `Gewicht: ${context.parsed.y}g`;
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: '#667eea',
+                                borderWidth: 1,
+                                callbacks: {
+                                    title: function(context) {
+                                        const date = new Date(context[0].parsed.x);
+                                        try {
+                                            return date.toLocaleDateString(undefined, {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            });
+                                        } catch (e) {
+                                            return date.toDateString();
+                                        }
+                                    },
+                                    label: function(context) {
+                                        return <?= json_encode(__('statistics.tooltip.weight_prefix')) ?> + context.parsed.y + 'g';
+                                    }
+                                }
                             }
-                        }
-                    }
-                },
+                        },
                 scales: {
                     x: {
                         type: 'time',
@@ -602,7 +606,7 @@ if (!empty($currentUser['custom_background'])) {
                         },
                         title: {
                             display: true,
-                            text: 'Datum',
+                            text: <?= json_encode(__('statistics.axis.date')) ?>,
                             font: {
                                 size: 14,
                                 weight: 'bold'
@@ -617,7 +621,7 @@ if (!empty($currentUser['custom_background'])) {
                         beginAtZero: false,
                         title: {
                             display: true,
-                            text: 'Gewicht (g)',
+                            text: <?= json_encode(__('statistics.axis.weight')) ?>,
                             font: {
                                 size: 14,
                                 weight: 'bold'
