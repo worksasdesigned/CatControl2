@@ -1,6 +1,7 @@
 # 🐱 CatControl - Kätzchen Verwaltungssystem
 
 CatControl ist eine webbasierte Anwendung zur Verwaltung von jungen Kätzchen, entwickelt für den Einsatz Heimnetzwerken. Das System ermöglicht die Erfassung von Fütterungsdaten, Tierarztbesuchen, Gewichtsstatistiken und vielem mehr.
+Unterstütze Sprachen: Deutsch, Englisch, Französisch
 
 <img width="1720" height="864" alt="image" src="https://github.com/user-attachments/assets/a1471571-bc01-40f1-a54b-7b7426f16216" />
 
