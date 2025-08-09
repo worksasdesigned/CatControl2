@@ -478,7 +478,7 @@ if (!empty($currentUser['custom_background'])) {
                 ?>
                 <div class="kitten-tile">
                     <?php if (!empty($appointments)): ?>
-                        <div class="appointment-alert" title="Termin in den nächsten 3 Tagen!">⚠️</div>
+                        <div class="appointment-alert" title="<?= __('dashboard.appointment_alert') ?>">⚠️</div>
                     <?php endif; ?>
                     
                     <?php if ($kitten['profile_image']): ?>
@@ -494,46 +494,46 @@ if (!empty($currentUser['custom_background'])) {
                     
                     <div class="kitten-info">
                         <div class="kitten-age">
-                            <?= $age['weeks'] ?> Wochen, <?= $age['days'] ?> Tage alt
+                            <?= __('dashboard.age', ['weeks' => $age['weeks'], 'days' => $age['days']]) ?>
                         </div>
                         <?php if ($weight): ?>
-                            <div class="kitten-weight">Gewicht: <?= $weight ?>g</div>
+                            <div class="kitten-weight"><?= __('dashboard.weight', ['grams' => $weight]) ?></div>
                         <?php endif; ?>
                     </div>
                     
                     <div class="kitten-actions">
                         <button class="btn-primary" onclick="location.href='feeding.php?kitten_id=<?= $kitten['id'] ?>'">
-                            Füttern
+                            <?= __('dashboard.feed') ?>
                         </button>
                         <button class="btn-secondary" onclick="location.href='veterinary.php?kitten_id=<?= $kitten['id'] ?>'">
-                            Tierarzt
+                            <?= __('dashboard.veterinary') ?>
                         </button>
                     </div>
                     
                     <div class="kitten-features">
                         <span class="feature-icon" onclick="location.href='gallery.php?kitten_id=<?= $kitten['id'] ?>'">
                             🖼️
-                            <div class="tooltip">Bildergalerie</div>
+                            <div class="tooltip"><?= __('dashboard.tooltip.gallery') ?></div>
                         </span>
                         <span class="feature-icon" onclick="location.href='export.php?kitten_id=<?= $kitten['id'] ?>'">
                             📤
-                            <div class="tooltip">Export</div>
+                            <div class="tooltip"><?= __('dashboard.tooltip.export') ?></div>
                         </span>
                         <span class="feature-icon" onclick="location.href='statistics.php?kitten_id=<?= $kitten['id'] ?>'">
                             📊
-                            <div class="tooltip">Gewichtsstatistik</div>
+                            <div class="tooltip"><?= __('dashboard.tooltip.statistics') ?></div>
                         </span>
                         <span class="feature-icon" onclick="location.href='add-kitten.php?kitten_id=<?= $kitten['id'] ?>'">
                             ✏️
-                            <div class="tooltip">Kätzchen bearbeiten</div>
+                            <div class="tooltip"><?= __('dashboard.tooltip.edit') ?></div>
                         </span>
                         <span class="feature-icon" onclick="showShareModal(<?= $kitten['id'] ?>, '<?= htmlspecialchars($kitten['name']) ?>')">
                             👥
-                            <div class="tooltip">Benutzer hinzufügen</div>
+                            <div class="tooltip"><?= __('dashboard.tooltip.share') ?></div>
                         </span>
                         <span class="feature-icon" onclick="togglePublic(<?= $kitten['id'] ?>, <?= $kitten['is_public'] ? 'true' : 'false' ?>)">
                             <?= $kitten['is_public'] ? '🌍' : '🔒' ?>
-                            <div class="tooltip"><?= $kitten['is_public'] ? 'Öffentlich' : 'Privat' ?></div>
+                            <div class="tooltip"><?= $kitten['is_public'] ? __('dashboard.tooltip.public') : __('dashboard.tooltip.private') ?></div>
                         </span>
                     </div>
                     
@@ -558,7 +558,7 @@ if (!empty($currentUser['custom_background'])) {
     <div id="shareModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeShareModal()">&times;</span>
-            <h2>Kätzchen teilen</h2>
+            <h2><?= __('dashboard.share.title') ?></h2>
             <div id="shareContent">
                 <!-- Content will be loaded via AJAX -->
             </div>
@@ -591,7 +591,7 @@ if (!empty($currentUser['custom_background'])) {
                     document.getElementById('shareContent').innerHTML = html;
                 })
                 .catch(error => {
-                    document.getElementById('shareContent').innerHTML = '<p>Fehler beim Laden der Benutzer.</p>';
+                    document.getElementById('shareContent').innerHTML = '<p><?= __('errors.load_users') ?></p>';
                 });
         }
 
@@ -611,13 +611,13 @@ if (!empty($currentUser['custom_background'])) {
                         .then(r => r.text())
                         .then(html => { document.getElementById('shareContent').innerHTML = html; });
                 } else {
-                    alert(data.message || 'Fehler beim Teilen');
+                    alert(data.message || '<?= __('errors.share') ?>');
                 }
-            }).catch(() => alert('Fehler beim Teilen'));
+            }).catch(() => alert('<?= __('errors.share') ?>'));
         }
 
         function unshareUser(userId) {
-            if (!confirm('Zugriff wirklich entfernen?')) return;
+            if (!confirm('<?= __('confirm.unshare') ?>')) return;
             if (!currentShareKittenId) return;
             fetch('ajax/share-kitten.php', {
                 method: 'POST',
@@ -632,7 +632,7 @@ if (!empty($currentUser['custom_background'])) {
                 } else {
                     alert(data.message || 'Fehler beim Entfernen');
                 }
-            }).catch(() => alert('Fehler beim Entfernen'));
+            }).catch(() => alert('<?= __('errors.unshare') ?>'));
         }
 
         function closeShareModal() {
@@ -642,8 +642,8 @@ if (!empty($currentUser['custom_background'])) {
         function togglePublic(kittenId, isCurrentlyPublic) {
             const action = isCurrentlyPublic ? 'private' : 'public';
             const confirmMessage = isCurrentlyPublic 
-                ? 'Kätzchen privat machen?' 
-                : 'Kätzchen öffentlich machen? Alle Daten werden für andere Benutzer sichtbar.';
+                ? '<?= __('confirm.make_private') ?>' 
+                : '<?= __('confirm.make_public') ?>';
             
             if (confirm(confirmMessage)) {
                 fetch('ajax/toggle-public.php', {
@@ -661,11 +661,11 @@ if (!empty($currentUser['custom_background'])) {
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + data.message);
+                        alert('<?= __('errors.update_generic') ?>: ' + data.message);
                     }
                 })
                 .catch(error => {
-                    alert('Fehler beim Aktualisieren');
+                    alert('<?= __('errors.update_generic') ?>');
                 });
             }
         }

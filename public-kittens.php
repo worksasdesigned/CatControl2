@@ -302,12 +302,12 @@ if (!empty($currentUser['custom_background'])) {
     </header>
 
     <main class="main-content">
-        <h1 class="page-title">🌍 Öffentliche Kätzchen</h1>
+        <h1 class="page-title">🌍 <?= __('public_kittens.title') ?></h1>
         
         <?php if (empty($publicKittens)): ?>
             <div class="no-kittens">
-                <p>Derzeit sind keine Kätzchen öffentlich sichtbar.</p>
-                <p style="margin-top: 10px; font-size: 14px;">Kätzchen werden hier angezeigt, wenn andere Benutzer sie als öffentlich markieren.</p>
+                <p><?= __('public_kittens.none_line1') ?></p>
+                <p style="margin-top: 10px; font-size: 14px;"><?= __('public_kittens.none_line2') ?></p>
             </div>
         <?php else: ?>
             <div class="kittens-grid">
@@ -330,7 +330,7 @@ if (!empty($currentUser['custom_background'])) {
                         <div class="kitten-name"><?= htmlspecialchars($kitten['name']) ?></div>
                         
                         <div class="owner-info">
-                            <div class="owner-name">Besitzer: <?= htmlspecialchars($kitten['owner_username']) ?></div>
+                            <div class="owner-name"><?= __('public_kittens.owner') ?>: <?= htmlspecialchars($kitten['owner_username']) ?></div>
                             <?php if ($kitten['owner_city'] && $kitten['owner_country']): ?>
                                 <div class="owner-location">
                                     📍 <?= htmlspecialchars($kitten['owner_city']) ?>, <?= htmlspecialchars($kitten['owner_country']) ?>
@@ -343,12 +343,12 @@ if (!empty($currentUser['custom_background'])) {
                         <div class="kitten-stats">
                             <div class="stat-box">
                                 <div class="stat-value"><?= $age['weeks'] ?>w <?= $age['days'] ?>t</div>
-                                <div class="stat-label">Alter</div>
+                                <div class="stat-label"><?= __('public_kittens.age') ?></div>
                             </div>
                             <?php if ($weight): ?>
                                 <div class="stat-box">
                                     <div class="stat-value"><?= $weight ?>g</div>
-                                    <div class="stat-label">Gewicht</div>
+                                    <div class="stat-label"><?= __('public_kittens.weight') ?></div>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -356,28 +356,28 @@ if (!empty($currentUser['custom_background'])) {
                         <div class="kitten-info">
                             <?php if ($kitten['color']): ?>
                                 <div class="info-row">
-                                    <span class="info-label">Farbe:</span>
+                                    <span class="info-label"><?= __('public_kittens.color') ?>:</span>
                                     <span class="info-value"><?= htmlspecialchars($kitten['color']) ?></span>
                                 </div>
                             <?php endif; ?>
                             
                             <?php if ($kitten['mother']): ?>
                                 <div class="info-row">
-                                    <span class="info-label">Mutter:</span>
+                                    <span class="info-label"><?= __('public_kittens.mother') ?>:</span>
                                     <span class="info-value"><?= htmlspecialchars($kitten['mother']) ?></span>
                                 </div>
                             <?php endif; ?>
                             
                             <?php if ($kitten['found_location']): ?>
                                 <div class="info-row">
-                                    <span class="info-label">Fundort:</span>
+                                    <span class="info-label"><?= __('public_kittens.found_location') ?>:</span>
                                     <span class="info-value"><?= htmlspecialchars($kitten['found_location']) ?></span>
                                 </div>
                             <?php endif; ?>
                             
                             <?php if ($kitten['postal_code']): ?>
                                 <div class="info-row">
-                                    <span class="info-label">PLZ:</span>
+                                    <span class="info-label"><?= __('public_kittens.postal_code') ?>:</span>
                                     <span class="info-value"><?= htmlspecialchars($kitten['postal_code']) ?></span>
                                 </div>
                             <?php endif; ?>

@@ -71,7 +71,7 @@ if (!empty($currentUser['custom_background'])) {
     <main class="main-content">
         <h1 class="page-title">📦 <?= __('menu.archived_kittens') ?></h1>
         <?php if (empty($archivedKittens)): ?>
-            <div class="no-kittens">Keine archivierten Kätzchen sichtbar.</div>
+            <div class="no-kittens"><?= __('archived_kittens.none') ?></div>
         <?php else: ?>
             <div class="kittens-grid">
                 <?php foreach ($archivedKittens as $kitten): ?>
@@ -85,8 +85,8 @@ if (!empty($currentUser['custom_background'])) {
                             <div class="kitten-profile-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 2.2em;" onclick="location.href='add-kitten.php?kitten_id=<?= $kitten['id'] ?>'">🐱</div>
                         <?php endif; ?>
                         <div class="kitten-name"><?= htmlspecialchars($kitten['name']) ?></div>
-                        <div class="kitten-info">Alter: <?= $age['weeks'] ?>w <?= $age['days'] ?>t</div>
-                        <button class="unarchive-btn" onclick="unarchive(<?= (int)$kitten['id'] ?>)">Aus dem Archiv holen</button>
+                        <div class="kitten-info"><?= __('archived_kittens.age') ?>: <?= $age['weeks'] ?>w <?= $age['days'] ?>t</div>
+                        <button class="unarchive-btn" onclick="unarchive(<?= (int)$kitten['id'] ?>)"><?= __('archived_kittens.unarchive') ?></button>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -103,9 +103,9 @@ if (!empty($currentUser['custom_background'])) {
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert(data.message || 'Fehler beim Aktualisieren');
+                    alert(data.message || '<?= __('errors.update_generic') ?>');
                 }
-            }).catch(() => alert('Fehler beim Aktualisieren'));
+            }).catch(() => alert('<?= __('errors.update_generic') ?>'));
         }
     </script>
 </body>

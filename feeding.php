@@ -62,16 +62,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['feeding_id'])) {
             $fid = (int)$_POST['feeding_id'];
             if ($kittenService->updateFeedingRecord($fid, $kittenId, $feedingData)) {
-                $success = 'Fütterungsdaten wurden aktualisiert!';
+                $success = __('errors.update_generic');
                 $recordId = 0;
             } else {
-                $error = 'Fehler beim Aktualisieren der Fütterungsdaten.';
+                $error = __('errors.update_generic');
             }
         } else {
             if ($kittenService->addFeedingRecord($feedingData)) {
-                $success = 'Fütterungsdaten wurden erfolgreich gespeichert!';
+                $success = __('feeding.saved');
             } else {
-                $error = 'Fehler beim Speichern der Fütterungsdaten.';
+                $error = __('feeding.save_error');
             }
         }
     }
@@ -79,9 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_feeding'])) {
         $feedingId = (int)$_POST['feeding_id'];
         if ($kittenService->deleteFeedingRecord($feedingId, $kittenId)) {
-            $success = 'Fütterungsdatensatz wurde gelöscht.';
+            $success = __('feeding.deleted');
         } else {
-            $error = 'Fehler beim Löschen des Datensatzes.';
+            $error = __('feeding.delete_error');
         }
     }
 }
@@ -120,7 +120,7 @@ if (!empty($currentUser['custom_background'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= __('app.name') ?> - Fütterung: <?= htmlspecialchars($kitten['name']) ?></title>
+    <title><?= __('app.name') ?> - <?= __('feeding.title') ?>: <?= htmlspecialchars($kitten['name']) ?></title>
     <style>
         * {
             margin: 0;
@@ -522,12 +522,12 @@ if (!empty($currentUser['custom_background'])) {
 <body>
     <header class="header">
         <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
     </header>
 
     <main class="main-content">
         <div class="kitten-header">
-            <h1 class="kitten-name">🍼 Fütterung: <?= htmlspecialchars($kitten['name']) ?></h1>
+            <h1 class="kitten-name">🍼 <?= __('feeding.title') ?>: <?= htmlspecialchars($kitten['name']) ?></h1>
         </div>
         
         <?php if ($error): ?>
@@ -540,12 +540,12 @@ if (!empty($currentUser['custom_background'])) {
         
         <!-- Feeding Form -->
         <div class="form-container" id="feedingFormContainer">
-            <h2 class="section-title"><?= $editRecord ? 'Fütterung bearbeiten' : 'Neue Fütterung erfassen' ?></h2>
+            <h2 class="section-title"><?= $editRecord ? __('feeding.section.edit') : __('feeding.section.new') ?></h2>
             <div style="text-align:center; margin-bottom: 10px;">
-                <button type="button" class="gear-toggle-btn" onclick="toggleVisibilityMode()">⚙️ Felder ein-/ausblenden</button>
+                <button type="button" class="gear-toggle-btn" onclick="toggleVisibilityMode()">⚙️ <?= __('feeding.visibility.toggle') ?></button>
             </div>
             <div class="visibility-controls">
-                <div><strong>Ausblend-Modus aktiv.</strong> Klicke auf 👁️ bei Feldern, um sie auszublenden. Versteckte Felder können unten wieder eingeblendet werden:</div>
+                <div><strong><?= __('feeding.visibility.active') ?></strong></div>
                 <div class="hidden-fields-list" id="hiddenFieldsList"></div>
             </div>
             
@@ -554,35 +554,35 @@ if (!empty($currentUser['custom_background'])) {
                 <div class="form-grid">
                     <!-- Always visible fields -->
                     <div class="form-group">
-                        <label for="date_time">Datum / Uhrzeit:</label>
+                        <label for="date_time"><?= __('feeding.labels.date_time') ?>:</label>
                         <input type="datetime-local" id="date_time" name="date_time" 
                                value="<?= htmlspecialchars(isset($editRecord['feeding_date']) ? date('Y-m-d\TH:i', strtotime($editRecord['feeding_date'])) : date('Y-m-d\TH:i')) ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="weight">Gewicht (in Gramm):</label>
+                        <label for="weight"><?= __('feeding.labels.weight') ?>:</label>
                         <input type="number" id="weight" name="weight" min="0" value="<?= htmlspecialchars($editRecord['weight_grams'] ?? '') ?>">
                         <?php if (!$hasWeightToday): ?>
-                            <div class="hint">Hinweis: Für heute wurde noch kein Gewicht erfasst.</div>
+                            <div class="hint"><?= __('feeding.hint.no_weight_today') ?></div>
                         <?php endif; ?>
                     </div>
                     
                     <!-- Hideable fields -->
                     <div class="form-group <?= isset($fieldPreferences['food_amount']) && !$fieldPreferences['food_amount'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label for="food_amount">Fütterung (in Gramm):</label>
+                        <label for="food_amount"><?= __('feeding.labels.food_amount') ?>:</label>
                         <input type="number" id="food_amount" name="food_amount" min="0" value="<?= htmlspecialchars($editRecord['food_amount_grams'] ?? '') ?>">
                     </div>
                     
                     <div class="form-group <?= isset($fieldPreferences['food_type']) && !$fieldPreferences['food_type'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label>Futter:</label>
+                        <label><?= __('feeding.labels.food') ?>:</label>
                         <div class="radio-group">
                             <?php $ft = $editRecord['food_type'] ?? null; ?>
-                            <label><input type="radio" name="food_type" value="milk" <?= ($ft==='katzenmilch' || $ft===null) ? 'checked' : '' ?>> Katzenmilch</label>
-                            <label><input type="radio" name="food_type" value="mixed" <?= $ft==='mischfutter' ? 'checked' : '' ?>> Mischfutter</label>
-                            <label><input type="radio" name="food_type" value="wet" <?= $ft==='nassfutter' ? 'checked' : '' ?>> Nassfutter</label>
-                            <label><input type="radio" name="food_type" value="dry" <?= $ft==='trockenfutter' ? 'checked' : '' ?>> Trockenfutter</label>
+                            <label><input type="radio" name="food_type" value="milk" <?= ($ft==='katzenmilch' || $ft===null) ? 'checked' : '' ?>> <?= __('feeding.food.milk') ?></label>
+                            <label><input type="radio" name="food_type" value="mixed" <?= $ft==='mischfutter' ? 'checked' : '' ?>> <?= __('feeding.food.mixed') ?></label>
+                            <label><input type="radio" name="food_type" value="wet" <?= $ft==='nassfutter' ? 'checked' : '' ?>> <?= __('feeding.food.wet') ?></label>
+                            <label><input type="radio" name="food_type" value="dry" <?= $ft==='trockenfutter' ? 'checked' : '' ?>> <?= __('feeding.food.dry') ?></label>
                         </div>
                     </div>
                     
@@ -590,52 +590,52 @@ if (!empty($currentUser['custom_background'])) {
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
                         <div class="checkbox-group">
                             <input type="checkbox" id="heat_bottle_refilled" name="heat_bottle_refilled" <?= !empty($editRecord['heating_pad_refilled']) ? 'checked' : '' ?>>
-                            <label for="heat_bottle_refilled">Wärmeflasche nachgefüllt</label>
+                            <label for="heat_bottle_refilled"><?= __('feeding.labels.heat_bottle') ?></label>
                         </div>
                     </div>
                     
                     <div class="form-group <?= isset($fieldPreferences['bowel_movement']) && !$fieldPreferences['bowel_movement'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label>Stuhlgang:</label>
+                        <label><?= __('feeding.labels.bowel') ?>:</label>
                         <div class="radio-group">
                             <?php $st = $editRecord['stool_type'] ?? ''; ?>
-                            <label><input type="radio" name="bowel_movement" value="urine" <?= $st==='urin' ? 'checked' : '' ?>> Urin</label>
-                            <label><input type="radio" name="bowel_movement" value="stool" <?= $st==='kot' ? 'checked' : '' ?>> Kot</label>
-                            <label><input type="radio" name="bowel_movement" value="both" <?= $st==='beides' ? 'checked' : '' ?>> Beides</label>
+                            <label><input type="radio" name="bowel_movement" value="urine" <?= $st==='urin' ? 'checked' : '' ?>> <?= __('feeding.bowel.urine') ?></label>
+                            <label><input type="radio" name="bowel_movement" value="stool" <?= $st==='kot' ? 'checked' : '' ?>> <?= __('feeding.bowel.stool') ?></label>
+                            <label><input type="radio" name="bowel_movement" value="both" <?= $st==='beides' ? 'checked' : '' ?>> <?= __('feeding.bowel.both') ?></label>
                         </div>
                     </div>
                     
                     <div class="form-group <?= isset($fieldPreferences['stool_consistency']) && !$fieldPreferences['stool_consistency'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label>Zustand Stuhlgang:</label>
+                        <label><?= __('feeding.labels.stool_consistency') ?>:</label>
                         <div class="radio-group">
                             <?php $sc = $editRecord['stool_consistency'] ?? ''; ?>
-                            <label><input type="radio" name="stool_consistency" value="firm" <?= $sc==='fest' ? 'checked' : '' ?>> Fest</label>
-                            <label><input type="radio" name="stool_consistency" value="liquid" <?= $sc==='fluessig' ? 'checked' : '' ?>> Flüssig</label>
+                            <label><input type="radio" name="stool_consistency" value="firm" <?= $sc==='fest' ? 'checked' : '' ?>> <?= __('feeding.consistency.firm') ?></label>
+                            <label><input type="radio" name="stool_consistency" value="liquid" <?= $sc==='fluessig' ? 'checked' : '' ?>> <?= __('feeding.consistency.liquid') ?></label>
                         </div>
                     </div>
                     
                     <div class="form-group <?= isset($fieldPreferences['stool_color']) && !$fieldPreferences['stool_color'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label for="stool_color">Farbe Stuhlgang:</label>
+                        <label for="stool_color"><?= __('feeding.labels.stool_color') ?>:</label>
                         <?php $scol = $editRecord['stool_color'] ?? ''; ?>
                         <select id="stool_color" name="stool_color" onchange="toggleOtherColor(this)">
-                            <option value="">Bitte wählen...</option>
-                            <option value="brown" <?= $scol==='braun' ? 'selected' : '' ?>>Braun</option>
-                            <option value="black" <?= $scol==='schwarz' ? 'selected' : '' ?>>Schwarz</option>
-                            <option value="orange" <?= $scol==='orange' ? 'selected' : '' ?>>Orange</option>
-                            <option value="red" <?= $scol==='rot' ? 'selected' : '' ?>>Rot</option>
-                            <option value="gray" <?= $scol==='grau' ? 'selected' : '' ?>>Grau</option>
-                            <option value="yellow" <?= $scol==='gelb' ? 'selected' : '' ?>>Gelb</option>
-                            <option value="other" <?= $scol==='sonstiges' ? 'selected' : '' ?>>Sonstiges</option>
+                            <option value=""><?= __('common.please_select') ?></option>
+                            <option value="brown" <?= $scol==='braun' ? 'selected' : '' ?>><?= __('feeding.color.brown') ?></option>
+                            <option value="black" <?= $scol==='schwarz' ? 'selected' : '' ?>><?= __('feeding.color.black') ?></option>
+                            <option value="orange" <?= $scol==='orange' ? 'selected' : '' ?>><?= __('feeding.color.orange') ?></option>
+                            <option value="red" <?= $scol==='rot' ? 'selected' : '' ?>><?= __('feeding.color.red') ?></option>
+                            <option value="gray" <?= $scol==='grau' ? 'selected' : '' ?>><?= __('feeding.color.gray') ?></option>
+                            <option value="yellow" <?= $scol==='gelb' ? 'selected' : '' ?>><?= __('feeding.color.yellow') ?></option>
+                            <option value="other" <?= $scol==='sonstiges' ? 'selected' : '' ?>><?= __('feeding.color.other') ?></option>
                         </select>
                         <input type="text" id="stool_color_other" name="stool_color_other" 
-                               placeholder="Andere Farbe..." style="margin-top: 10px; display: <?= ($scol==='sonstiges') ? 'block' : 'none' ?>;" value="<?= htmlspecialchars($editRecord['stool_color_other'] ?? '') ?>">
+                               placeholder="<?= __('feeding.color.other_placeholder') ?>" style="margin-top: 10px; display: <?= ($scol==='sonstiges') ? 'block' : 'none' ?>;" value="<?= htmlspecialchars($editRecord['stool_color_other'] ?? '') ?>">
                     </div>
                     
                     <div class="form-group <?= isset($fieldPreferences['fitness_level']) && !$fieldPreferences['fitness_level'] ? 'hidden' : '' ?>">
                         <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                        <label for="fitness_level">Fitnesslevel (0-10):</label>
+                        <label for="fitness_level"><?= __('feeding.labels.fitness') ?>:</label>
                         <div class="slider-container">
                             <?php $fl = isset($editRecord['fitness_level']) ? (int)$editRecord['fitness_level'] : 5; ?>
                             <input type="range" id="fitness_level" name="fitness_level" 
@@ -646,44 +646,44 @@ if (!empty($currentUser['custom_background'])) {
                     </div>
 
                     <div class="form-group">
-                        <label>Augenstatus:</label>
+                        <label><?= __('feeding.labels.eyes') ?>:</label>
                         <?php $eyes = isset($editRecord['eyes_open']) ? (int)$editRecord['eyes_open'] : ($lastEyesOpen ?? 0); ?>
                         <div class="radio-group">
-                            <label><input type="radio" name="eyes_open" value="1" <?= $eyes === 1 ? 'checked' : '' ?>> Augen offen</label>
-                            <label><input type="radio" name="eyes_open" value="0" <?= $eyes === 0 ? 'checked' : '' ?>> Augen geschlossen</label>
+                            <label><input type="radio" name="eyes_open" value="1" <?= $eyes === 1 ? 'checked' : '' ?>> <?= __('feeding.eyes.open') ?></label>
+                            <label><input type="radio" name="eyes_open" value="0" <?= $eyes === 0 ? 'checked' : '' ?>> <?= __('feeding.eyes.closed') ?></label>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group full-width <?= isset($fieldPreferences['notes']) && !$fieldPreferences['notes'] ? 'hidden' : '' ?>">
                     <button type="button" class="hide-toggle" onclick="toggleField(this)">👁️</button>
-                    <label for="notes">Bemerkungen:</label>
+                    <label for="notes"><?= __('feeding.labels.notes') ?>:</label>
                     <textarea id="notes" name="notes" rows="3" cols="40"><?= htmlspecialchars($editRecord['notes'] ?? '') ?></textarea>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" name="save_feeding" class="btn-primary"><?= $editRecord ? 'Aktualisieren' : 'Speichern' ?></button>
-                    <a href="dashboard.php" class="btn-secondary">Abbrechen</a>
+                    <button type="submit" name="save_feeding" class="btn-primary"><?= $editRecord ? __('common.edit') : __('common.save') ?></button>
+                    <a href="dashboard.php" class="btn-secondary"><?= __('common.cancel') ?></a>
                 </div>
             </form>
         </div>
         
         <!-- Recent Records -->
         <div class="form-container">
-            <h2 class="section-title">Letzte Fütterungen</h2>
+            <h2 class="section-title"><?= __('feeding.recent_title') ?></h2>
             
             <?php if (empty($feedingRecords)): ?>
-                <p style="text-align: center; color: #666; font-style: italic;">Noch keine Fütterungsdaten erfasst.</p>
+                <p style="text-align: center; color: #666; font-style: italic;"><?= __('feeding.none') ?></p>
             <?php else: ?>
                 <table class="records-table">
                     <thead>
                         <tr>
-                            <th>Datum/Zeit</th>
-                            <th>Gewicht</th>
-                            <th>Futter</th>
-                            <th>Fitness</th>
-                            <th>Bemerkung</th>
-                            <th>Aktionen</th>
+                            <th><?= __('feeding.table.date_time') ?></th>
+                            <th><?= __('feeding.table.weight') ?></th>
+                            <th><?= __('feeding.table.food') ?></th>
+                            <th><?= __('feeding.table.fitness') ?></th>
+                            <th><?= __('feeding.table.note') ?></th>
+                            <th><?= __('feeding.table.actions') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -695,11 +695,11 @@ if (!empty($currentUser['custom_background'])) {
                                 <td><?= $record['fitness_level'] !== null ? ((int)$record['fitness_level'] . '/10') : '—' ?></td>
                                 <td><?= htmlspecialchars($record['notes'] ?? '') ?></td>
                                 <td>
-                                    <button class="btn-small btn-edit" onclick="editRecord(<?= $record['id'] ?>)">Ändern</button>
+                                    <button class="btn-small btn-edit" onclick="editRecord(<?= $record['id'] ?>)"><?= __('common.edit') ?></button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="feeding_id" value="<?= $record['id'] ?>">
                                         <button type="submit" name="delete_feeding" class="btn-small btn-delete" 
-                                                onclick="return confirm('Datensatz löschen?')">Löschen</button>
+                                                onclick="return confirm('<?= __('common.confirm_delete') ?>')"><?= __('common.delete') ?></button>
                                     </form>
                                 </td>
                             </tr>

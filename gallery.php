@@ -46,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_image'])) {
         $caption = trim($_POST['caption'] ?? '');
         
         if (!in_array($fileType, $allowedTypes)) {
-            $uploadMessage = '<div class="message error">Nur JPEG, PNG, GIF und WebP Dateien sind erlaubt.</div>';
+            $uploadMessage = '<div class="message error">' . __('gallery.error.invalid_type') . '</div>';
         } elseif ($fileSize > $maxSize) {
-            $uploadMessage = '<div class="message error">Die Datei ist zu groß. Maximum: 10MB.</div>';
+            $uploadMessage = '<div class="message error">' . __('gallery.error.too_big') . '</div>';
         } else {
             $uploadDir = 'uploads/kitten_images/';
             if (!is_dir($uploadDir)) {
@@ -73,17 +73,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_image'])) {
                     $stmt = $pdo->prepare("INSERT INTO kitten_images (kitten_id, filename, original_name, caption) VALUES (?, ?, ?, ?)");
                     $stmt->execute([$kitten_id, $filename, $_FILES['image']['name'], $caption]);
                     
-                    $uploadMessage = '<div class="message success">Bild erfolgreich hochgeladen!</div>';
+                    $uploadMessage = '<div class="message success">' . __('gallery.success.upload') . '</div>';
                 } catch (PDOException $e) {
                     unlink($filepath); // Remove uploaded file on database error
-                    $uploadMessage = '<div class="message error">Datenbankfehler beim Speichern des Bildes.</div>';
+                    $uploadMessage = '<div class="message error">' . __('gallery.error.db') . '</div>';
                 }
             } else {
-                $uploadMessage = '<div class="message error">Fehler beim Hochladen der Datei.</div>';
+                $uploadMessage = '<div class="message error">' . __('gallery.error.upload') . '</div>';
             }
         }
     } else {
-        $uploadMessage = '<div class="message error">Bitte wählen Sie eine Datei aus.</div>';
+        $uploadMessage = '<div class="message error">' . __('gallery.error.no_file') . '</div>';
     }
 }
 
@@ -116,10 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
                 unlink($filepath);
             }
             
-            $uploadMessage = '<div class="message success">Bild erfolgreich gelöscht!</div>';
+            $uploadMessage = '<div class="message success">' . __('gallery.success.delete') . '</div>';
         }
     } catch (PDOException $e) {
-        $uploadMessage = '<div class="message error">Fehler beim Löschen des Bildes.</div>';
+        $uploadMessage = '<div class="message error">' . __('errors.update_generic') . '</div>';
     }
 }
 
@@ -141,13 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_profile_image']))
             if ($image) {
                 $result = $kittenService->updateProfileImage($kitten_id, $currentUser['id'], $image['filename']);
                 if ($result['success']) {
-                    $uploadMessage = '<div class="message success">Profilbild aktualisiert.</div>';
+                    $uploadMessage = '<div class="message success">' . __('gallery.success.profile') . '</div>';
                 } else {
                     $uploadMessage = '<div class="message error">' . htmlspecialchars($result['message']) . '</div>';
                 }
             }
         } catch (PDOException $e) {
-            $uploadMessage = '<div class="message error">Fehler beim Setzen des Profilbildes.</div>';
+            $uploadMessage = '<div class="message error">' . __('errors.update_generic') . '</div>';
         }
     }
 }
@@ -181,11 +181,11 @@ if (!empty($currentUser['custom_background'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bildergalerie - <?= htmlspecialchars($kitten['name']) ?> - CatControl</title>
+    <title><?= __('gallery.title') ?> - <?= htmlspecialchars($kitten['name']) ?> - <?= __('app.name') ?></title>
     <style>
         * {
             margin: 0;
@@ -500,36 +500,36 @@ if (!empty($currentUser['custom_background'])) {
 <body>
     <div class="overlay">
         <div class="container">
-            <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
+            <a href="dashboard.php" class="back-button">← <?= __('menu.back_to_dashboard') ?></a>
             
             <div class="header">
-                <h1>🖼️ Bildergalerie</h1>
-                <p>Kätzchen: <?= htmlspecialchars($kitten['name']) ?></p>
+                <h1>🖼️ <?= __('gallery.title') ?></h1>
+                <p><?= __('gallery.kitten_label', ['name' => htmlspecialchars($kitten['name'])]) ?></p>
             </div>
             
             <?= $uploadMessage ?>
             
             <div class="upload-section">
-                <h2>📸 Neues Bild hochladen</h2>
+                <h2>📸 <?= __('gallery.upload_title') ?></h2>
                 <form method="POST" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="image">Bild auswählen (JPEG, PNG, GIF, WebP - max. 10MB):</label>
+                        <label for="image"><?= __('gallery.select_image_label') ?></label>
                         <input type="file" name="image" id="image" accept="image/*" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="caption">Bildunterschrift (optional):</label>
-                        <input type="text" name="caption" id="caption" placeholder="Beschreibung des Bildes...">
+                        <label for="caption"><?= __('gallery.caption_label') ?></label>
+                        <input type="text" name="caption" id="caption" placeholder="<?= __('gallery.caption_placeholder') ?>">
                     </div>
                     
-                    <button type="submit" name="upload_image" class="btn">📸 Bild hochladen</button>
+                    <button type="submit" name="upload_image" class="btn">📸 <?= __('gallery.upload_button') ?></button>
                 </form>
             </div>
             
             <?php if (empty($images)): ?>
                 <div class="no-images">
-                    <h3>📷 Noch keine Bilder vorhanden</h3>
-                    <p>Laden Sie das erste Bild von <?= htmlspecialchars($kitten['name']) ?> hoch!</p>
+                    <h3>📷 <?= __('gallery.no_images_title') ?></h3>
+                    <p><?= __('gallery.no_images_text', ['name' => htmlspecialchars($kitten['name'])]) ?></p>
                 </div>
             <?php else: ?>
                 <div class="gallery">
@@ -545,20 +545,20 @@ if (!empty($currentUser['custom_background'])) {
                                 <?php if ($image['caption']): ?>
                                     <p><?= htmlspecialchars($image['caption']) ?></p>
                                 <?php endif; ?>
-                                <p><small>Hochgeladen: <?= date('d.m.Y H:i', strtotime($image['upload_date'])) ?></small></p>
+                                <p><small><?= __('gallery.uploaded_at', ['datetime' => date('d.m.Y H:i', strtotime($image['upload_date']))]) ?></small></p>
                                 
                                 <div class="image-actions">
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <?php if (!empty($image['is_profile_image'])): ?>
-                                            <button type="button" class="btn" disabled>✅ Profilbild</button>
+                                            <button type="button" class="btn" disabled>✅ <?= __('gallery.profile_image') ?></button>
                                         <?php else: ?>
-                                            <button type="submit" name="set_profile_image" class="btn">⭐ Als Profilbild setzen</button>
+                                            <button type="submit" name="set_profile_image" class="btn">⭐ <?= __('gallery.set_profile') ?></button>
                                         <?php endif; ?>
                                     </form>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Sind Sie sicher, dass Sie dieses Bild löschen möchten?')">
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('<?= __('gallery.delete_confirm') ?>')">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
-                                        <button type="submit" name="delete_image" class="btn btn-danger">🗑️ Löschen</button>
+                                        <button type="submit" name="delete_image" class="btn btn-danger">🗑️ <?= __('gallery.delete') ?></button>
                                     </form>
                                 </div>
                             </div>

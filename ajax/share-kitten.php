@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Render HTML content for modal
 $kitten = $kittenService->getKittenById($kittenId);
 if (!$kitten || (int)$kitten['owner_id'] !== (int)$currentUser['id']) {
-    echo '<p>Nur der Besitzer kann das Kätzchen teilen.</p>';
+    echo '<p>' . __('auth.not_logged_in') . '</p>';
     exit;
 }
 
@@ -96,19 +96,19 @@ function shareWithSelected() {
         body: new URLSearchParams({ action: 'share', kitten_id: '<?= $kittenId ?>', user_id: String(userId) })
     }).then(r => r.json()).then(data => {
         if (data.success) { location.reload(); }
-        else { alert(data.message || 'Fehler beim Teilen'); }
-    }).catch(() => alert('Fehler beim Teilen'));
+        else { alert(data.message || '<?= __('errors.share') ?>'); }
+    }).catch(() => alert('<?= __('errors.share') ?>'));
 }
 
 function unshareUser(userId) {
-    if (!confirm('Zugriff wirklich entfernen?')) return;
+    if (!confirm('<?= __('confirm.unshare') ?>')) return;
     fetch('ajax/share-kitten.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ action: 'unshare', kitten_id: '<?= $kittenId ?>', user_id: String(userId) })
     }).then(r => r.json()).then(data => {
         if (data.success) { location.reload(); }
-        else { alert(data.message || 'Fehler beim Entfernen'); }
-    }).catch(() => alert('Fehler beim Entfernen'));
+        else { alert(data.message || '<?= __('errors.unshare') ?>'); }
+    }).catch(() => alert('<?= __('errors.unshare') ?>'));
 }
 </script>

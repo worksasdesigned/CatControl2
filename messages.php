@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($result['success'])) {
             $success = $result['message'] ?? 'Nachricht wurde gelöscht.';
         } else {
-            $error = $result['message'] ?? 'Fehler beim Löschen der Nachricht.';
+            $error = $result['message'] ?? __('errors.update_generic');
         }
     }
     

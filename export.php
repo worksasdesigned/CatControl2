@@ -387,11 +387,11 @@ if (!empty($currentUser['custom_background'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daten Export - <?= htmlspecialchars($kitten['name']) ?> - CatControl</title>
+    <title><?= __('app.name') ?> - Daten Export - <?= htmlspecialchars($kitten['name']) ?></title>
     <style>
         * {
             margin: 0;
@@ -607,7 +607,7 @@ if (!empty($currentUser['custom_background'])) {
 <body>
     <div class="overlay">
         <div class="container">
-            <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
+            <a href="dashboard.php" class="back-button">← <?= __('menu.back_to_dashboard') ?></a>
             
             <div class="header">
                 <h1>📦 Daten Export</h1>
