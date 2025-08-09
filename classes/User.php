@@ -13,17 +13,17 @@ class User {
     public function register($username, $email, $password, $country, $city = null, $allowMessages = true) {
         // Check if username exists
         if ($this->getUserByUsername($username)) {
-            return ['success' => false, 'message' => 'Benutzername bereits vergeben'];
+            return ['success' => false, 'message' => __('user.register.username_taken') ?? 'Benutzername bereits vergeben'];
         }
         
         // Check if email exists
         if ($this->getUserByEmail($email)) {
-            return ['success' => false, 'message' => 'E-Mail-Adresse bereits registriert'];
+            return ['success' => false, 'message' => __('user.register.email_taken') ?? 'E-Mail-Adresse bereits registriert'];
         }
         
         // Validate password
         if (strlen($password) < 8) {
-            return ['success' => false, 'message' => 'Passwort muss mindestens 8 Zeichen lang sein'];
+            return ['success' => false, 'message' => __('user.password.too_short') ?? 'Passwort muss mindestens 8 Zeichen lang sein'];
         }
         
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
@@ -33,10 +33,10 @@ class User {
         
         try {
             $this->db->execute($sql, [$username, $email, $passwordHash, $country, $city, $allowMessages ? 1 : 0]);
-            return ['success' => true, 'message' => 'Registrierung erfolgreich'];
+            return ['success' => true, 'message' => __('user.register.success') ?? 'Registrierung erfolgreich'];
         } catch (Exception $e) {
             error_log("Registration error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Registrierung fehlgeschlagen'];
+            return ['success' => false, 'message' => __('user.register.failed') ?? 'Registrierung fehlgeschlagen'];
         }
     }
     
@@ -44,7 +44,7 @@ class User {
         $user = $this->getUserByUsername($username);
         
         if (!$user || !password_verify($password, $user['password_hash'])) {
-            return ['success' => false, 'message' => 'Ungültige Anmeldedaten'];
+            return ['success' => false, 'message' => __('user.login.invalid_credentials') ?? 'Ungültige Anmeldedaten'];
         }
         
         // Start session and store user data
@@ -99,7 +99,7 @@ class User {
     
     public function updatePassword($userId, $newPassword) {
         if (strlen($newPassword) < 8) {
-            return ['success' => false, 'message' => 'Passwort muss mindestens 8 Zeichen lang sein'];
+            return ['success' => false, 'message' => __('user.password.too_short') ?? 'Passwort muss mindestens 8 Zeichen lang sein'];
         }
         
         $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -107,10 +107,10 @@ class User {
         
         try {
             $this->db->execute($sql, [$passwordHash, $userId]);
-            return ['success' => true, 'message' => 'Passwort erfolgreich geändert'];
+            return ['success' => true, 'message' => __('user.password.changed') ?? 'Passwort erfolgreich geändert'];
         } catch (Exception $e) {
             error_log("Password update error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Passwort konnte nicht geändert werden'];
+            return ['success' => false, 'message' => __('user.password.change_failed') ?? 'Passwort konnte nicht geändert werden'];
         }
     }
     
@@ -138,7 +138,7 @@ class User {
             return ['success' => true, 'message' => 'Profil erfolgreich aktualisiert'];
         } catch (Exception $e) {
             error_log("Profile update error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Profil konnte nicht aktualisiert werden'];
+            return ['success' => false, 'message' => __('profile.update_failed') ?? 'Profil konnte nicht aktualisiert werden'];
         }
     }
 
@@ -175,7 +175,7 @@ class User {
         $user = $this->getUserByEmail($email);
         if (!$user) {
             // Don't reveal if email exists or not
-            return ['success' => true, 'message' => 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
+            return ['success' => true, 'message' => __('email.reset_link_sent') ?? 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
         }
         
         // Generate reset token
@@ -206,23 +206,23 @@ class User {
             
             $emailService->sendEmail($user['email'], $subject, $message);
             
-            return ['success' => true, 'message' => 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
+            return ['success' => true, 'message' => __('email.reset_link_sent') ?? 'Falls die E-Mail-Adresse registriert ist, wurde eine E-Mail gesendet'];
         } catch (Exception $e) {
             error_log("Password reset request error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Fehler beim Senden der E-Mail'];
+            return ['success' => false, 'message' => __('email.send_failed') ?? 'Fehler beim Senden der E-Mail'];
         }
     }
     
     public function resetPassword($token, $newPassword) {
         if (strlen($newPassword) < 8) {
-            return ['success' => false, 'message' => 'Passwort muss mindestens 8 Zeichen lang sein'];
+            return ['success' => false, 'message' => __('user.password.too_short') ?? 'Passwort muss mindestens 8 Zeichen lang sein'];
         }
         
         $sql = "SELECT * FROM password_reset_tokens WHERE token = ? AND expires_at > NOW() AND used = 0";
         $resetToken = $this->db->fetch($sql, [$token]);
         
         if (!$resetToken) {
-            return ['success' => false, 'message' => 'Ungültiger oder abgelaufener Token'];
+            return ['success' => false, 'message' => __('user.password.invalid_token') ?? 'Ungültiger oder abgelaufener Token'];
         }
         
         $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -240,11 +240,11 @@ class User {
             
             $this->db->commit();
             
-            return ['success' => true, 'message' => 'Passwort erfolgreich zurückgesetzt'];
+            return ['success' => true, 'message' => __('user.password.reset_success') ?? 'Passwort erfolgreich zurückgesetzt'];
         } catch (Exception $e) {
             $this->db->rollback();
             error_log("Password reset error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Fehler beim Zurücksetzen des Passworts'];
+            return ['success' => false, 'message' => __('user.password.reset_failed') ?? 'Fehler beim Zurücksetzen des Passworts'];
         }
     }
     

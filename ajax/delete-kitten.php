@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once __DIR__ . '/../config/i18n.php';
 require_once '../classes/User.php';
 require_once '../classes/Kitten.php';
 
@@ -12,7 +13,7 @@ $kittenService = new Kitten();
 // Check if user is logged in
 if (!$userService->isLoggedIn()) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Nicht angemeldet']);
+    echo json_encode(['success' => false, 'message' => __('auth.not_logged_in') ?? 'Nicht angemeldet']);
     exit;
 }
 

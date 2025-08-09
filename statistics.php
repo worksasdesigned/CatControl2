@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 require_once 'classes/Kitten.php';
 

@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 require_once 'classes/Kitten.php';
 
@@ -28,11 +29,11 @@ if (!empty($currentUser['custom_background'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Archivierte Kätzchen</title>
+    <title><?= __('app.name') ?> - <?= __('menu.archived_kittens') ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-image: url('<?= $backgroundImage ?>'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; font-family: 'Arial', sans-serif; color: #333; }
@@ -55,12 +56,20 @@ if (!empty($currentUser['custom_background'])) {
 </head>
 <body>
     <header class="header">
-        <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
+        <div>
+            <span style="margin-right:10px;">
+                <?= __('menu.language') ?>:
+                <a href="<?= i18n_url_with_lang('de') ?>">DE</a>
+                <a href="<?= i18n_url_with_lang('en') ?>">EN</a>
+                <a href="<?= i18n_url_with_lang('fr') ?>">FR</a>
+            </span>
+            <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
+        </div>
     </header>
 
     <main class="main-content">
-        <h1 class="page-title">📦 Archivierte Kätzchen</h1>
+        <h1 class="page-title">📦 <?= __('menu.archived_kittens') ?></h1>
         <?php if (empty($archivedKittens)): ?>
             <div class="no-kittens">Keine archivierten Kätzchen sichtbar.</div>
         <?php else: ?>

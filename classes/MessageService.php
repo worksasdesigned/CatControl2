@@ -16,7 +16,7 @@ class MessageService {
     public function sendMessage($senderId, $recipientId, $subject, $content, $messageType = 'user_message') {
         // Check if sender is blocked by recipient
         if ($this->userService->isUserBlocked($recipientId, $senderId)) {
-            return ['success' => false, 'message' => 'Sie können diesem Benutzer keine Nachrichten senden'];
+            return ['success' => false, 'message' => __('messages.cannot_send') ?? 'Sie können diesem Benutzer keine Nachrichten senden'];
         }
         
         $sql = "INSERT INTO messages (sender_id, recipient_id, subject, content, message_type) 

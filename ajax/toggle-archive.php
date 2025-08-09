@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once __DIR__ . '/../config/i18n.php';
 require_once '../classes/User.php';
 require_once '../classes/Kitten.php';
 
@@ -12,7 +13,7 @@ $kittenService = new Kitten();
 // Check if user is logged in
 if (!$userService->isLoggedIn()) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Nicht angemeldet']);
+    echo json_encode(['success' => false, 'message' => __('auth.not_logged_in') ?? 'Nicht angemeldet']);
     exit;
 }
 
@@ -23,7 +24,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 if (!isset($input['kitten_id']) || !isset($input['is_archived'])) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Ungültige Parameter']);
+    echo json_encode(['success' => false, 'message' => __('errors.invalid_params') ?? 'Ungültige Parameter']);
     exit;
 }
 

@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 
 $userService = new User();
@@ -42,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_password'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Passwort zurücksetzen</title>
+    <title><?= __('app.name') ?> - <?= __('reset_password.title') ?></title>
     <style>
         body {
             background-image: url('assets/images/background.png');
@@ -185,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_password'])) {
 <body>
     <div class="reset-container">
         <div class="logo">🐱 CatControl</div>
-        <div class="tagline">Passwort zurücksetzen</div>
+        <div class="tagline"><?= __('reset_password.title') ?></div>
         
         <?php if ($error): ?>
             <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -201,17 +202,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_password'])) {
                 <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
                 
                 <div class="form-group">
-                    <label for="new_password">Neues Passwort:</label>
+                    <label for="new_password"><?= __('reset_password.new') ?>:</label>
                     <input type="password" id="new_password" name="new_password" required>
                     <small>Mindestens 8 Zeichen</small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirm_password">Passwort bestätigen:</label>
+                    <label for="confirm_password"><?= __('reset_password.confirm') ?>:</label>
                     <input type="password" id="confirm_password" name="confirm_password" required>
                 </div>
                 
-                <button type="submit" name="reset_password" class="btn">Passwort ändern</button>
+                <button type="submit" name="reset_password" class="btn"><?= __('reset_password.change') ?></button>
             </form>
         <?php else: ?>
             <div class="links">

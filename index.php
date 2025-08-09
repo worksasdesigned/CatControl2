@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 
 $userService = new User();
@@ -22,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $rememberMe = isset($_POST['remember_me']);
         
         if (empty($username) || empty($password)) {
-            $error = 'Bitte füllen Sie alle Felder aus';
+            $error = __('login.error.fill_all');
         } else {
             $result = $userService->login($username, $password);
             
@@ -47,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = trim($_POST['email'] ?? '');
         
         if (empty($email)) {
-            $error = 'Bitte geben Sie Ihre E-Mail-Adresse ein';
+            $error = __('login.error.fill_all');
         } else {
             $result = $userService->requestPasswordReset($email);
             $success = $result['message'];
@@ -63,11 +64,11 @@ if (isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === 'accepte
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Anmeldung</title>
+    <title><?= __('app.name') ?> - <?= __('login.title') ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
@@ -241,6 +242,14 @@ if (isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === 'accepte
         .cookie-consent button:hover {
             background: #ff5252;
         }
+        .lang-switch {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.9em;
+        }
+        .lang-switch a { color: #333; text-decoration: none; margin: 0 4px; }
+        .lang-switch a:hover { text-decoration: underline; }
         
         @media (max-width: 480px) {
             .login-container {
@@ -256,8 +265,13 @@ if (isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === 'accepte
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">🐱 CatControl</div>
-        <div class="tagline">Die einfache Seite um junge Kätzchen zu verwalten</div>
+        <div class="lang-switch">
+            <a href="<?= i18n_url_with_lang('de') ?>">DE</a>|
+            <a href="<?= i18n_url_with_lang('en') ?>">EN</a>|
+            <a href="<?= i18n_url_with_lang('fr') ?>">FR</a>
+        </div>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
+        <div class="tagline"><?= __('login.tagline') ?></div>
         
         <?php if ($error): ?>
             <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -270,45 +284,45 @@ if (isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === 'accepte
         <!-- Login Form -->
         <form method="post" id="loginForm">
             <div class="form-group">
-                <label for="username">Benutzername:</label>
+                <label for="username"><?= __('login.username') ?>:</label>
                 <input type="text" id="username" name="username" value="<?= htmlspecialchars($rememberedUsername) ?>" required>
             </div>
             
             <div class="form-group">
-                <label for="password">Passwort:</label>
+                <label for="password"><?= __('login.password') ?>:</label>
                 <input type="password" id="password" name="password" required>
             </div>
             
             <div class="checkbox-group">
                 <input type="checkbox" id="remember_me" name="remember_me">
-                <label for="remember_me">Benutzername merken</label>
+                <label for="remember_me"><?= __('login.remember') ?></label>
             </div>
             
-            <button type="submit" name="login" class="btn">Anmelden</button>
+            <button type="submit" name="login" class="btn"><?= __('login.submit') ?></button>
         </form>
         
         <!-- Forgot Password Form (Hidden by default) -->
         <form method="post" id="forgotPasswordForm" class="forgot-password-form">
             <div class="form-group">
-                <label for="email">E-Mail-Adresse:</label>
+                <label for="email"><?= __('login.forgot.email') ?>:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             
-            <button type="submit" name="forgot_password" class="btn">Passwort zurücksetzen</button>
-            <button type="button" class="btn btn-secondary" onclick="showLoginForm()">Zurück zur Anmeldung</button>
+            <button type="submit" name="forgot_password" class="btn"><?= __('login.forgot_submit') ?></button>
+            <button type="button" class="btn btn-secondary" onclick="showLoginForm()"><?= __('login.back_to_login') ?></button>
         </form>
         
         <div class="links">
-            <a href="#" onclick="showForgotPasswordForm()">Passwort vergessen?</a>
-            <a href="register.php">Registrieren</a>
+            <a href="#" onclick="showForgotPasswordForm()"><?= __('login.forgot') ?></a>
+            <a href="register.php"><?= __('login.register') ?></a>
         </div>
     </div>
     
     <!-- Cookie Consent Banner -->
     <div id="cookieConsent" class="cookie-consent">
-        <p>Diese Website verwendet Cookies, um Ihnen die beste Erfahrung zu bieten. Durch die weitere Nutzung stimmen Sie der Verwendung von Cookies zu.</p>
-        <button onclick="acceptCookies()">Alle Cookies akzeptieren</button>
-        <button onclick="rejectCookies()">Nur notwendige Cookies</button>
+        <p><?= __('cookie.text') ?></p>
+        <button onclick="acceptCookies()"><?= __('cookie.accept_all') ?></button>
+        <button onclick="rejectCookies()"><?= __('cookie.necessary_only') ?></button>
     </div>
     
     <script>

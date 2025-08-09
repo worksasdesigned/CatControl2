@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 
 $userService = new User();
@@ -132,11 +133,11 @@ if (!empty($currentUser['custom_background'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Profil bearbeiten</title>
+    <title><?= __('app.name') ?> - <?= __('profile.title') ?></title>
     <style>
         * {
             margin: 0;
@@ -396,8 +397,16 @@ if (!empty($currentUser['custom_background'])) {
 </head>
 <body>
     <header class="header">
-        <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
+        <div>
+            <span style="margin-right:10px;">
+                <?= __('menu.language') ?>:
+                <a href="<?= i18n_url_with_lang('de') ?>">DE</a>
+                <a href="<?= i18n_url_with_lang('en') ?>">EN</a>
+                <a href="<?= i18n_url_with_lang('fr') ?>">FR</a>
+            </span>
+            <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
+        </div>
     </header>
 
     <main class="main-content">
@@ -411,36 +420,36 @@ if (!empty($currentUser['custom_background'])) {
             <?php endif; ?>
             
             <div class="navigation-links">
-                <a href="change-password.php" class="nav-link">Passwort ändern</a>
-                <a href="messages.php" class="nav-link">Nachrichten</a>
-                <a href="public-kittens.php" class="nav-link">Öffentliche Kätzchen</a>
+                <a href="change-password.php" class="nav-link"><?= __('menu.change_password') ?></a>
+                <a href="messages.php" class="nav-link"><?= __('menu.messages') ?></a>
+                <a href="public-kittens.php" class="nav-link"><?= __('menu.public_kittens') ?></a>
             </div>
             
             <!-- Profile Information -->
             <div class="form-section">
-                <h2 class="section-title">Profil bearbeiten</h2>
+                <h2 class="section-title"><?= __('profile.title') ?></h2>
                 
                 <form method="POST">
                     <div class="form-group">
-                        <label for="username">Benutzername</label>
+                        <label for="username"><?= __('profile.username') ?></label>
                         <input type="text" id="username" name="username" required 
                                value="<?= htmlspecialchars($currentUser['username']) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="email">E-Mail-Adresse</label>
+                        <label for="email"><?= __('profile.email') ?></label>
                         <input type="email" id="email" name="email" required 
                                value="<?= htmlspecialchars($currentUser['email']) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="country">Land</label>
+                        <label for="country"><?= __('profile.country') ?></label>
                         <input type="text" id="country" name="country" 
                                value="<?= htmlspecialchars($currentUser['country']) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="city">Stadt (optional)</label>
+                        <label for="city"><?= __('profile.city') ?></label>
                         <input type="text" id="city" name="city" 
                                value="<?= htmlspecialchars($currentUser['city']) ?>">
                     </div>
@@ -449,11 +458,11 @@ if (!empty($currentUser['custom_background'])) {
                         <div class="checkbox-group">
                             <input type="checkbox" id="allow_messages" name="allow_messages" 
                                    <?= $currentUser['allow_messages'] ? 'checked' : '' ?>>
-                            <label for="allow_messages">Andere Benutzer dürfen mir Nachrichten schreiben</label>
+                            <label for="allow_messages"><?= __('profile.allow_messages') ?></label>
                         </div>
                     </div>
                     
-                    <button type="submit" name="update_profile" class="btn-primary">Profil aktualisieren</button>
+                    <button type="submit" name="update_profile" class="btn-primary"><?= __('profile.update') ?></button>
                 </form>
             </div>
             

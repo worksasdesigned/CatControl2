@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once 'config/i18n.php';
 require_once 'classes/User.php';
 
 $userService = new User();
@@ -66,11 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Registrierung</title>
+    <title><?= __('app.name') ?> - <?= __('login.register') ?></title>
     <style>
         body {
             background-image: url('assets/images/background.png');
@@ -246,8 +247,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 </head>
 <body>
     <div class="register-container">
-        <div class="logo">🐱 CatControl</div>
-        <div class="tagline">Registrierung - Kätzchen verwalten leicht gemacht</div>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
+        <div class="tagline"><?= __('login.tagline') ?></div>
         
         <?php if ($error): ?>
             <div class="alert alert-error"><?= $error ?></div>
@@ -259,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         
         <form method="post">
             <div class="form-group">
-                <label for="username">Benutzername: <span class="required">*</span></label>
+                <label for="username"><?= __('profile.username') ?>: <span class="required">*</span></label>
                 <input type="text" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
             </div>
             
@@ -270,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="password">Passwort: <span class="required">*</span></label>
+                    <label for="password"><?= __('login.password') ?>: <span class="required">*</span></label>
                     <input type="password" id="password" name="password" required>
                     <small>Mindestens 8 Zeichen</small>
                 </div>
