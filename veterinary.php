@@ -89,16 +89,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['record_id'])) {
             $rid = (int)$_POST['record_id'];
             if ($kittenService->updateVeterinaryRecord($rid, $kittenId, $data)) {
-                $success = 'Tierarztbesuch wurde aktualisiert.';
+                $success = __('vet.updated');
                 $recordId = 0;
             } else {
-                $error = 'Fehler beim Aktualisieren.';
+                $error = __('vet.update_error');
             }
         } else {
             if ($kittenService->addVeterinaryRecord($data)) {
-                $success = 'Tierarztbesuch wurde gespeichert!';
+                $success = __('vet.saved');
             } else {
-                $error = 'Fehler beim Speichern.';
+                $error = __('vet.save_error');
             }
         }
     }
@@ -106,9 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_vet'])) {
         $rid = (int)($_POST['record_id'] ?? 0);
         if ($rid && $kittenService->deleteVeterinaryRecord($rid, $kittenId)) {
-            $success = 'Eintrag wurde gelöscht.';
+            $success = __('vet.deleted');
         } else {
-            $error = 'Fehler beim Löschen.';
+            $error = __('vet.delete_error');
         }
     }
 }
@@ -136,11 +136,11 @@ if (!empty($currentUser['custom_background'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= htmlspecialchars(i18n_current_lang()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatControl - Tierarzt: <?= htmlspecialchars($kitten['name']) ?></title>
+    <title><?= __('app.name') ?> - <?= __('vet.title') ?>: <?= htmlspecialchars($kitten['name']) ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -174,12 +174,12 @@ if (!empty($currentUser['custom_background'])) {
 <body>
     <header class="header">
         <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
     </header>
 
     <main class="main-content">
         <div class="kitten-header">
-            <h1 class="kitten-name">🏥 Tierarzt: <?= htmlspecialchars($kitten['name']) ?></h1>
+            <h1 class="kitten-name">🏥 <?= __('vet.title') ?>: <?= htmlspecialchars($kitten['name']) ?></h1>
         </div>
 
         <?php if ($error): ?>
@@ -190,107 +190,107 @@ if (!empty($currentUser['custom_background'])) {
         <?php endif; ?>
 
         <div class="form-container">
-            <h2 class="section-title">Tierarztbesuch erfassen</h2>
+            <h2 class="section-title"><?= __('vet.form.title') ?></h2>
             <form method="POST">
                 <input type="hidden" name="record_id" value="<?= $editRecord['id'] ?? '' ?>">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="visit_date">Datum</label>
+                        <label for="visit_date"><?= __('vet.form.date') ?></label>
                         <input type="date" id="visit_date" name="visit_date" value="<?= htmlspecialchars($editRecord['visit_date'] ?? date('Y-m-d')) ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="veterinarian_name">Tierarzt (Name)</label>
+                        <label for="veterinarian_name"><?= __('vet.form.veterinarian_name') ?></label>
                         <input type="text" id="veterinarian_name" name="veterinarian_name" maxlength="100" value="<?= htmlspecialchars($editRecord['veterinarian_name'] ?? ($lastVetName ?: '')) ?>">
                     </div>
                     <div class="form-group full-width">
-                        <label for="diagnosis">Befund</label>
+                        <label for="diagnosis"><?= __('vet.form.diagnosis') ?></label>
                         <textarea id="diagnosis" name="diagnosis" rows="3"><?= htmlspecialchars($editRecord['diagnosis'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group full-width">
-                        <label for="vaccination">Impfung</label>
+                        <label for="vaccination"><?= __('vet.form.vaccination') ?></label>
                         <textarea id="vaccination" name="vaccination" rows="3"><?= htmlspecialchars($editRecord['vaccination'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="next_vaccination_date">Datum nächste Impfung</label>
+                        <label for="next_vaccination_date"><?= __('vet.form.next_vaccination_date') ?></label>
                         <input type="date" id="next_vaccination_date" name="next_vaccination_date" value="<?= htmlspecialchars($editRecord['next_vaccination_date'] ?? '') ?>">
                     </div>
                     <div class="form-group">
-                        <label>Entwurmung</label>
-                        <div class="checkbox-group"><input type="checkbox" id="deworming" name="deworming" <?= !empty($editRecord['deworming']) ? 'checked' : '' ?>><label for="deworming">Durchgeführt</label></div>
+                        <label><?= __('vet.form.deworming') ?></label>
+                        <div class="checkbox-group"><input type="checkbox" id="deworming" name="deworming" <?= !empty($editRecord['deworming']) ? 'checked' : '' ?>><label for="deworming"><?= __('vet.form.deworming_done') ?></label></div>
                     </div>
                     <div class="form-group">
-                        <label for="deworming_medication">Entwurmung Medikament</label>
+                        <label for="deworming_medication"><?= __('vet.form.deworming_medication') ?></label>
                         <input type="text" id="deworming_medication" name="deworming_medication" maxlength="60" value="<?= htmlspecialchars($editRecord['deworming_medication'] ?? '') ?>">
                     </div>
                     <div class="form-group">
-                        <label for="next_deworming_interval">Nächste Entwurmung</label>
+                        <label for="next_deworming_interval"><?= __('vet.form.next_deworming') ?></label>
                         <select id="next_deworming_interval" name="next_deworming_interval">
                             <?php $intv = $editRecord['next_deworming_interval'] ?? ''; ?>
-                            <option value="">Bitte wählen...</option>
-                            <option value="1_week" <?= $intv==='1_week'?'selected':'' ?>>1 Woche</option>
-                            <option value="2_weeks" <?= $intv==='2_weeks'?'selected':'' ?>>2 Wochen</option>
-                            <option value="4_weeks" <?= $intv==='4_weeks'?'selected':'' ?>>4 Wochen</option>
-                            <option value="2_months" <?= $intv==='2_months'?'selected':'' ?>>2 Monate</option>
-                            <option value="3_months" <?= $intv==='3_months'?'selected':'' ?>>3 Monate</option>
-                            <option value="4_months" <?= $intv==='4_months'?'selected':'' ?>>4 Monate</option>
-                            <option value="6_months" <?= $intv==='6_months'?'selected':'' ?>>6 Monate</option>
-                            <option value="1_year" <?= $intv==='1_year'?'selected':'' ?>>1 Jahr</option>
+                            <option value=""><?= __('common.please_select') ?></option>
+                            <option value="1_week" <?= $intv==='1_week'?'selected':'' ?>><?= __('vet.interval.1_week') ?></option>
+                            <option value="2_weeks" <?= $intv==='2_weeks'?'selected':'' ?>><?= __('vet.interval.2_weeks') ?></option>
+                            <option value="4_weeks" <?= $intv==='4_weeks'?'selected':'' ?>><?= __('vet.interval.4_weeks') ?></option>
+                            <option value="2_months" <?= $intv==='2_months'?'selected':'' ?>><?= __('vet.interval.2_months') ?></option>
+                            <option value="3_months" <?= $intv==='3_months'?'selected':'' ?>><?= __('vet.interval.3_months') ?></option>
+                            <option value="4_months" <?= $intv==='4_months'?'selected':'' ?>><?= __('vet.interval.4_months') ?></option>
+                            <option value="6_months" <?= $intv==='6_months'?'selected':'' ?>><?= __('vet.interval.6_months') ?></option>
+                            <option value="1_year" <?= $intv==='1_year'?'selected':'' ?>><?= __('vet.interval.1_year') ?></option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Zeckenschutz</label>
-                        <div class="checkbox-group"><input type="checkbox" id="tick_protection" name="tick_protection" <?= !empty($editRecord['tick_protection']) ? 'checked' : '' ?>><label for="tick_protection">Durchgeführt</label></div>
+                        <label><?= __('vet.form.tick_protection') ?></label>
+                        <div class="checkbox-group"><input type="checkbox" id="tick_protection" name="tick_protection" <?= !empty($editRecord['tick_protection']) ? 'checked' : '' ?>><label for="tick_protection"><?= __('vet.form.tick_protection_done') ?></label></div>
                     </div>
                     <div class="form-group full-width">
-                        <label for="tick_protection_medication">Zeckenschutz Medikament</label>
+                        <label for="tick_protection_medication"><?= __('vet.form.tick_protection_medication') ?></label>
                         <textarea id="tick_protection_medication" name="tick_protection_medication" rows="2"><?= htmlspecialchars($editRecord['tick_protection_medication'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="next_tick_protection_interval">Nächster Zeckenschutz</label>
+                        <label for="next_tick_protection_interval"><?= __('vet.form.next_tick_protection') ?></label>
                         <select id="next_tick_protection_interval" name="next_tick_protection_interval">
                             <?php $tintv = $editRecord['next_tick_protection_interval'] ?? ''; ?>
-                            <option value="">Bitte wählen...</option>
-                            <option value="1_week" <?= $tintv==='1_week'?'selected':'' ?>>1 Woche</option>
-                            <option value="2_weeks" <?= $tintv==='2_weeks'?'selected':'' ?>>2 Wochen</option>
-                            <option value="4_weeks" <?= $tintv==='4_weeks'?'selected':'' ?>>4 Wochen</option>
-                            <option value="2_months" <?= $tintv==='2_months'?'selected':'' ?>>2 Monate</option>
-                            <option value="3_months" <?= $tintv==='3_months'?'selected':'' ?>>3 Monate</option>
-                            <option value="4_months" <?= $tintv==='4_months'?'selected':'' ?>>4 Monate</option>
-                            <option value="6_months" <?= $tintv==='6_months'?'selected':'' ?>>6 Monate</option>
-                            <option value="1_year" <?= $tintv==='1_year'?'selected':'' ?>>1 Jahr</option>
+                            <option value=""><?= __('common.please_select') ?></option>
+                            <option value="1_week" <?= $tintv==='1_week'?'selected':'' ?>><?= __('vet.interval.1_week') ?></option>
+                            <option value="2_weeks" <?= $tintv==='2_weeks'?'selected':'' ?>><?= __('vet.interval.2_weeks') ?></option>
+                            <option value="4_weeks" <?= $tintv==='4_weeks'?'selected':'' ?>><?= __('vet.interval.4_weeks') ?></option>
+                            <option value="2_months" <?= $tintv==='2_months'?'selected':'' ?>><?= __('vet.interval.2_months') ?></option>
+                            <option value="3_months" <?= $tintv==='3_months'?'selected':'' ?>><?= __('vet.interval.3_months') ?></option>
+                            <option value="4_months" <?= $tintv==='4_months'?'selected':'' ?>><?= __('vet.interval.4_months') ?></option>
+                            <option value="6_months" <?= $tintv==='6_months'?'selected':'' ?>><?= __('vet.interval.6_months') ?></option>
+                            <option value="1_year" <?= $tintv==='1_year'?'selected':'' ?>><?= __('vet.interval.1_year') ?></option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="next_visit_date">Nächster geplanter Tierarztbesuch</label>
+                        <label for="next_visit_date"><?= __('vet.form.next_visit_date') ?></label>
                         <input type="date" id="next_visit_date" name="next_visit_date" value="<?= htmlspecialchars($editRecord['next_visit_date'] ?? '') ?>">
                     </div>
                     <div class="form-group">
-                        <label for="cost_eur">Kosten in EUR</label>
+                        <label for="cost_eur"><?= __('vet.form.cost_eur') ?></label>
                         <input type="number" step="0.01" id="cost_eur" name="cost_eur" value="<?= htmlspecialchars($editRecord['cost_eur'] ?? '') ?>">
                     </div>
                 </div>
                 <div class="form-actions" style="display:flex; gap:12px; justify-content:center; margin-top: 20px;">
-                    <button type="submit" name="save_vet" class="btn-primary">Speichern</button>
-                    <a href="dashboard.php" class="btn-secondary">Abbrechen</a>
+                    <button type="submit" name="save_vet" class="btn-primary"><?= __('common.save') ?></button>
+                    <a href="dashboard.php" class="btn-secondary"><?= __('common.cancel') ?></a>
                 </div>
             </form>
         </div>
 
         <div class="form-container">
-            <h2 class="section-title">Alle Tierarztbesuche</h2>
+            <h2 class="section-title"><?= __('vet.table.title') ?></h2>
             <?php if (empty($vetRecords)): ?>
-                <p style="text-align:center; color:#666; font-style:italic;">Noch keine Einträge vorhanden.</p>
+                <p style="text-align:center; color:#666; font-style:italic;"><?= __('vet.none') ?></p>
             <?php else: ?>
                 <table class="records-table">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Tierarzt</th>
-                            <th>Impfung</th>
-                            <th>Nächste Impfung</th>
-                            <th>Nächster Besuch</th>
-                            <th>Kosten (EUR)</th>
-                            <th>Aktionen</th>
+                            <th><?= __('vet.table.date') ?></th>
+                            <th><?= __('vet.table.veterinarian') ?></th>
+                            <th><?= __('vet.table.vaccination') ?></th>
+                            <th><?= __('vet.table.next_vaccination') ?></th>
+                            <th><?= __('vet.table.next_visit') ?></th>
+                            <th><?= __('vet.table.cost') ?></th>
+                            <th><?= __('vet.table.actions') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -303,10 +303,10 @@ if (!empty($currentUser['custom_background'])) {
                                 <td><?= $vr['next_visit_date'] ? date('d.m.Y', strtotime($vr['next_visit_date'])) : '-' ?></td>
                                 <td><?= $vr['cost_eur'] !== null ? number_format((float)$vr['cost_eur'], 2, ',', '') : '-' ?></td>
                                 <td>
-                                    <button class="btn-small btn-edit" onclick="location.href='veterinary.php?kitten_id=<?= $kittenId ?>&record_id=<?= $vr['id'] ?>'">Ändern</button>
-                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Eintrag wirklich löschen?');">
+                                    <button class="btn-small btn-edit" onclick="location.href='veterinary.php?kitten_id=<?= $kittenId ?>&record_id=<?= $vr['id'] ?>'"><?= __('common.edit') ?></button>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('<?= __('common.confirm_delete') ?>');">
                                         <input type="hidden" name="record_id" value="<?= $vr['id'] ?>">
-                                        <button type="submit" name="delete_vet" class="btn-small btn-delete">Löschen</button>
+                                        <button type="submit" name="delete_vet" class="btn-small btn-delete"><?= __('common.delete') ?></button>
                                     </form>
                                 </td>
                             </tr>

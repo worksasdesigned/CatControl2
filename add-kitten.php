@@ -136,12 +136,12 @@ if (!empty($currentUser['custom_background'])) {
 <body>
     <header class="header">
         <div class="logo">🐱 CatControl</div>
-        <a href="dashboard.php" class="back-btn">← Zurück zum Dashboard</a>
+        <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
     </header>
 
     <main class="main-content">
         <div class="form-container">
-            <h1 class="page-title"><?= $editing ? 'Kätzchen bearbeiten' : 'Neues Kätzchen anlegen' ?></h1>
+            <h1 class="page-title"><?= $editing ? __('kittens.edit') : __('dashboard.add_kitten') ?></h1>
             <?php if ($editing && !empty($kittenToEdit['is_archived'])): ?>
                 <div class="subtle">Dieses Kätzchen ist aktuell <strong>archiviert</strong>.</div>
             <?php endif; ?>
@@ -236,7 +236,7 @@ if (!empty($currentUser['custom_background'])) {
                         <button type="button" class="btn-archive" onclick="toggleArchive(<?= (int)$kittenId ?>, <?= $isArchived ? 'true' : 'false' ?>)">
                             <?= $isArchived ? 'Aus dem Archiv holen' : 'Archivieren' ?>
                         </button>
-                        <button type="button" class="btn-danger" onclick="deleteKitten(<?= (int)$kittenId ?>)">Löschen</button>
+                        <button type="button" class="btn-danger" onclick="deleteKitten(<?= (int)$kittenId ?>)"><?= __('common.delete') ?></button>
                     <?php endif; ?>
                 </div>
             </form>
@@ -255,9 +255,9 @@ if (!empty($currentUser['custom_background'])) {
                 if (data.success) {
                     window.location.href = 'dashboard.php';
                 } else {
-                    alert(data.message || 'Fehler beim Aktualisieren');
+                    alert(data.message || '<?= __('errors.update_generic') ?>');
                 }
-            }).catch(() => alert('Fehler beim Aktualisieren'));
+            }).catch(() => alert('<?= __('errors.update_generic') ?>'));
         }
         function deleteKitten(kittenId) {
             if (!confirm('Dieses Kätzchen und alle zugehörigen Daten dauerhaft löschen?')) return;
@@ -270,9 +270,9 @@ if (!empty($currentUser['custom_background'])) {
                     alert('Kätzchen gelöscht');
                     window.location.href = 'dashboard.php';
                 } else {
-                    alert(data.message || 'Fehler beim Löschen');
+                    alert(data.message || '<?= __('common.delete') ?>');
                 }
-            }).catch(() => alert('Fehler beim Löschen'));
+            }).catch(() => alert('<?= __('errors.update_generic') ?>'));
         }
     </script>
 </body>
