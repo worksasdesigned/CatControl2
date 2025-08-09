@@ -190,11 +190,60 @@ return [
                         }
                     }
                     
+                    // Versuch: PHPMailer automatisch installieren (Composer)
+                    $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Installation übersprungen';
+                    try {
+                        $canShell = function_exists('shell_exec') && stripos((string)ini_get('disable_functions'), 'shell_exec') === false;
+                        $projectRoot = __DIR__;
+                        
+                        if ($canShell) {
+                            // Prüfen, ob bereits vorhanden
+                            if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+                                // Composer ermitteln oder composer.phar lokal installieren
+                                $composerCmd = trim((string)@shell_exec('command -v composer'));
+                                if (empty($composerCmd)) {
+                                    // Composer-Installer herunterladen
+                                    $installerPath = $projectRoot . '/composer-setup.php';
+                                    $installerCode = @file_get_contents('https://getcomposer.org/installer');
+                                    if ($installerCode !== false) {
+                                        @file_put_contents($installerPath, $installerCode);
+                                        @shell_exec('php ' . escapeshellarg($installerPath) . ' --install-dir=' . escapeshellarg($projectRoot) . ' --filename=composer.phar 2>&1');
+                                        @unlink($installerPath);
+                                        $composerCmd = 'php ' . escapeshellarg($projectRoot . '/composer.phar');
+                                    } else {
+                                        // Fallback via curl (falls erlaubt)
+                                        @shell_exec('curl -sS https://getcomposer.org/installer | php');
+                                        if (file_exists($projectRoot . '/composer.phar')) {
+                                            $composerCmd = 'php ' . escapeshellarg($projectRoot . '/composer.phar');
+                                        }
+                                    }
+                                }
+                                
+                                if (!empty($composerCmd)) {
+                                    chdir($projectRoot);
+                                    @shell_exec($composerCmd . ' require phpmailer/phpmailer:^6.9 --no-interaction --no-dev 2>&1');
+                                }
+                            }
+                            
+                            // Prüfen, ob Installation erfolgreich war
+                            if (file_exists($projectRoot . '/vendor/autoload.php')) {
+                                $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): erfolgreich installiert';
+                            } else {
+                                $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): nicht installiert (Composer nicht verfügbar). Nutzen Sie alternativ die Datei <code>setup_php_mail.php</code>.';
+                            }
+                        } else {
+                            $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Shell-Ausführung deaktiviert. Bitte führen Sie <code>setup_php_mail.php</code> aus oder installieren Sie PHPMailer manuell.';
+                        }
+                    } catch (Throwable $t) {
+                        $mailerStatusHtml = '• E-Mail-Bibliothek (PHPMailer): Fehler bei der automatischen Installation: ' . htmlspecialchars($t->getMessage());
+                    }
+                    
                     echo '<div class="success">
                         ✅ <strong>Installation erfolgreich!</strong><br>
                         • Datenbank wurde erstellt und initialisiert<br>
                         • Konfigurationsdatei wurde erstellt<br>
                         • Upload-Verzeichnisse wurden erstellt<br>
+                        ' . $mailerStatusHtml . '<br>
                         • Standard-Admin-Benutzer: admin / katze<br><br>
                         <strong>Wichtig:</strong> Bitte löschen Sie diese install.php Datei aus Sicherheitsgründen!
                     </div>';

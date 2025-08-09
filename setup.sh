@@ -93,7 +93,8 @@ apt install -y \
     certbot \
     python3-certbot-apache \
     ufw \
-    fail2ban
+    fail2ban \
+    composer
 
 print_success "Alle Pakete installiert"
 
@@ -118,6 +119,8 @@ sed -i 's/post_max_size = .*/post_max_size = 10M/' $PHP_INI
 sed -i 's/max_execution_time = .*/max_execution_time = 300/' $PHP_INI
 sed -i 's/memory_limit = .*/memory_limit = 256M/' $PHP_INI
 sed -i 's/;date.timezone =.*/date.timezone = Europe\/Berlin/' $PHP_INI
+# shell_exec erlauben (disable_functions ohne shell_exec)
+sed -i 's/^disable_functions\s*=.*$/; disable_functions entfernt, um shell_exec zu erlauben/' $PHP_INI || true
 
 print_success "PHP konfiguriert"
 
@@ -262,7 +265,21 @@ chmod +x /usr/local/bin/catcontrol-backup.sh
 
 print_success "Backup-Script erstellt"
 
-print_status "=== Schritt 12: Index-Seite erstellen ==="
+print_status "=== Schritt 12: PHPMailer installieren (Composer) ==="
+if [ -d "$WEBROOT" ]; then
+  pushd "$WEBROOT" >/dev/null
+  if [ ! -f "composer.json" ]; then
+    sudo -u www-data composer init --no-interaction --name catcontrol/app --description "CatControl" --type project --require phpmailer/phpmailer:^6.9 --no-ansi
+  else
+    sudo -u www-data composer require phpmailer/phpmailer:^6.9 --no-interaction --no-ansi
+  fi
+  popd >/dev/null
+  print_success "PHPMailer via Composer installiert"
+else
+  print_warning "Webroot $WEBROOT nicht gefunden, überspringe PHPMailer-Installation"
+fi
+
+print_status "=== Schritt 13: Index-Seite erstellen ==="
 
 # Temporäre Index-Seite
 cat > $WEBROOT/index.html << EOF
