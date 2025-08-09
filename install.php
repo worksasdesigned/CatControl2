@@ -92,22 +92,47 @@
         $config_file = 'config/database.php';
         $config_dir = 'config';
         
+        // Environment-based defaults for Docker
+        $envDbHost = getenv('DB_HOST') ?: 'db';
+        $envDbName = getenv('DB_NAME') ?: 'catcontrol';
+        $envDbUser = getenv('DB_USER') ?: 'phpuser';
+        $envDbPassword = getenv('DB_PASSWORD') ?: '';
+        $envAdminEmail = getenv('ADMIN_EMAIL') ?: '';
+        $envSmtpHost = getenv('SMTP_HOST') ?: '';
+        $envSmtpUsername = getenv('SMTP_USERNAME') ?: '';
+        $envSmtpPassword = getenv('SMTP_PASSWORD') ?: '';
+        $allowInstall = (getenv('ALLOW_INSTALL') === '1');
+
         // Check if already installed
+        $isInstalled = false;
         if (file_exists($config_file)) {
-            echo '<div class="warning">⚠️ CatControl scheint bereits installiert zu sein. Wenn Sie neu installieren möchten, löschen Sie bitte die Datei config/database.php</div>';
+            try {
+                $existingConfig = @include $config_file;
+                // Consider it installed if a non-placeholder password is set
+                if (is_array($existingConfig) && isset($existingConfig['password']) && $existingConfig['password'] !== 'changeme123' && $existingConfig['password'] !== '') {
+                    $isInstalled = true;
+                }
+            } catch (Throwable $t) {
+                // If config is broken, treat as not installed to allow recovery
+                $isInstalled = false;
+            }
+        }
+
+        if ($isInstalled && !$allowInstall) {
+            echo '<div class="warning">⚠️ CatControl scheint bereits installiert zu sein. Wenn Sie neu installieren möchten, löschen Sie bitte die Datei <code>config/database.php</code> oder setzen Sie die Umgebungsvariable <code>ALLOW_INSTALL=1</code>.</div>';
             echo '<p><a href="index.php" class="btn">Zur Anwendung</a></p>';
             exit;
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $db_host = $_POST['db_host'] ?? 'db';
-            $db_name = $_POST['db_name'] ?? 'catcontrol';
-            $db_user = $_POST['db_user'] ?? 'phpuser';
-            $db_password = $_POST['db_password'] ?? '';
-            $admin_email = $_POST['admin_email'] ?? '';
-            $smtp_host = $_POST['smtp_host'] ?? '';
-            $smtp_username = $_POST['smtp_username'] ?? '';
-            $smtp_password = $_POST['smtp_password'] ?? '';
+            $db_host = $_POST['db_host'] ?? $envDbHost;
+            $db_name = $_POST['db_name'] ?? $envDbName;
+            $db_user = $_POST['db_user'] ?? $envDbUser;
+            $db_password = $_POST['db_password'] ?? $envDbPassword;
+            $admin_email = $_POST['admin_email'] ?? $envAdminEmail;
+            $smtp_host = $_POST['smtp_host'] ?? $envSmtpHost;
+            $smtp_username = $_POST['smtp_username'] ?? $envSmtpUsername;
+            $smtp_password = $_POST['smtp_password'] ?? $envSmtpPassword;
             
             $errors = [];
             
@@ -320,22 +345,22 @@ return [
                 
                 <div class="form-group">
                     <label for="db_host">Datenbank-Host:</label>
-                    <input type="text" id="db_host" name="db_host" value="db" required>
+                    <input type="text" id="db_host" name="db_host" value="<?php echo htmlspecialchars($_POST['db_host'] ?? $envDbHost, ENT_QUOTES); ?>" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="db_name">Datenbankname:</label>
-                    <input type="text" id="db_name" name="db_name" value="catcontrol" required>
+                    <input type="text" id="db_name" name="db_name" value="<?php echo htmlspecialchars($_POST['db_name'] ?? $envDbName, ENT_QUOTES); ?>" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="db_user">Datenbank-Benutzer:</label>
-                    <input type="text" id="db_user" name="db_user" value="phpuser" required>
+                    <input type="text" id="db_user" name="db_user" value="<?php echo htmlspecialchars($_POST['db_user'] ?? $envDbUser, ENT_QUOTES); ?>" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="db_password">Datenbank-Passwort:</label>
-                    <input type="password" id="db_password" name="db_password" required>
+                    <input type="password" id="db_password" name="db_password" value="<?php echo htmlspecialchars($_POST['db_password'] ?? $envDbPassword, ENT_QUOTES); ?>" required>
                     <small>Passwort für den Datenbankbenutzer 'phpuser'</small>
                 </div>
             </div>
@@ -345,23 +370,23 @@ return [
                 
                 <div class="form-group">
                     <label for="admin_email">Administrator E-Mail:</label>
-                    <input type="email" id="admin_email" name="admin_email" required>
+                    <input type="email" id="admin_email" name="admin_email" value="<?php echo htmlspecialchars($_POST['admin_email'] ?? $envAdminEmail, ENT_QUOTES); ?>" required>
                     <small>Diese E-Mail wird für System-Benachrichtigungen verwendet</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="smtp_host">SMTP-Host (für Gmail: smtp.gmail.com):</label>
-                    <input type="text" id="smtp_host" name="smtp_host" placeholder="smtp.gmail.com">
+                    <input type="text" id="smtp_host" name="smtp_host" value="<?php echo htmlspecialchars($_POST['smtp_host'] ?? $envSmtpHost, ENT_QUOTES); ?>" placeholder="smtp.gmail.com">
                 </div>
                 
                 <div class="form-group">
                     <label for="smtp_username">SMTP-Benutzername:</label>
-                    <input type="text" id="smtp_username" name="smtp_username" placeholder="ihre-email@gmail.com">
+                    <input type="text" id="smtp_username" name="smtp_username" value="<?php echo htmlspecialchars($_POST['smtp_username'] ?? $envSmtpUsername, ENT_QUOTES); ?>" placeholder="ihre-email@gmail.com">
                 </div>
                 
                 <div class="form-group">
                     <label for="smtp_password">SMTP-Passwort (App-Passwort):</label>
-                    <input type="password" id="smtp_password" name="smtp_password">
+                    <input type="password" id="smtp_password" name="smtp_password" value="<?php echo htmlspecialchars($_POST['smtp_password'] ?? $envSmtpPassword, ENT_QUOTES); ?>">
                     <small>Für Gmail: Verwenden Sie ein App-Passwort, nicht Ihr normales Passwort</small>
                 </div>
             </div>
