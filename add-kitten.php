@@ -51,9 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validation
         if (empty($name)) {
-            $error = 'Name ist ein Pflichtfeld.';
+            $error = __('kittens.validation.name_required');
         } elseif (empty($birth_date)) {
-            $error = 'Geburtsdatum ist ein Pflichtfeld.';
+            $error = __('kittens.validation.birth_date_required');
         } else {
             $kittenData = [
                 'name' => $name,
@@ -68,19 +68,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'sex' => $sex
             ];
             
-            if ($editing) {
-                $result = $kittenService->updateKitten($kittenId, $currentUser['id'], $kittenData);
-            } else {
-                $result = $kittenService->createKitten($currentUser['id'], $kittenData);
-            }
-            
-            if ($result['success']) {
-                $success = $editing ? 'Kätzchen wurde aktualisiert!' : 'Kätzchen wurde erfolgreich angelegt!';
-                header("refresh:2;url=dashboard.php");
-            } else {
-                $error = $result['message'] ?? 'Fehler beim Speichern des Kätzchens.';
-            }
+                    if ($editing) {
+            $result = $kittenService->updateKitten($kittenId, $currentUser['id'], $kittenData);
+        } else {
+            $result = $kittenService->createKitten($currentUser['id'], $kittenData);
         }
+        
+        if ($result['success']) {
+            $success = $editing ? __('kittens.updated') : __('kittens.saved');
+            header("refresh:2;url=dashboard.php");
+        } else {
+            $error = $result['message'] ?? __('errors.update_generic');
+        }
+    }
     }
 }
 
@@ -135,7 +135,7 @@ if (!empty($currentUser['custom_background'])) {
 </head>
 <body>
     <header class="header">
-        <div class="logo">🐱 CatControl</div>
+        <div class="logo">🐱 <?= __('app.name') ?></div>
         <a href="dashboard.php" class="back-btn">← <?= __('menu.back_to_dashboard') ?></a>
     </header>
 
@@ -143,7 +143,7 @@ if (!empty($currentUser['custom_background'])) {
         <div class="form-container">
             <h1 class="page-title"><?= $editing ? __('kittens.edit') : __('dashboard.add_kitten') ?></h1>
             <?php if ($editing && !empty($kittenToEdit['is_archived'])): ?>
-                <div class="subtle">Dieses Kätzchen ist aktuell <strong>archiviert</strong>.</div>
+                <div class="subtle"><?= __('kittens.archived_hint') ?></div>
             <?php endif; ?>
             
             <?php if ($error): ?>
@@ -157,44 +157,44 @@ if (!empty($currentUser['custom_background'])) {
             <form method="POST">
                 <input type="hidden" name="kitten_id" value="<?= $editing ? (int)$kittenId : '' ?>">
                 <div class="form-group">
-                    <label for="name">Name <span class="required">*</span></label>
+                    <label for="name"><?= __('kittens.form.name') ?> <span class="required">*</span></label>
                     <input type="text" id="name" name="name" required 
                            value="<?= htmlspecialchars($editing ? ($kittenToEdit['name'] ?? '') : ($_POST['name'] ?? '')) ?>">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="birth_date">Geschätztes Geburtsdatum <span class="required">*</span></label>
+                        <label for="birth_date"><?= __('kittens.form.birth_date') ?> <span class="required">*</span></label>
                         <input type="date" id="birth_date" name="birth_date" required 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['birth_date'] ?? '') : ($_POST['birth_date'] ?? '')) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="color">Farbe</label>
+                        <label for="color"><?= __('kittens.form.color') ?></label>
                         <input type="text" id="color" name="color" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['color'] ?? '') : ($_POST['color'] ?? '')) ?>">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Geschlecht</label>
+                    <label><?= __('kittens.form.sex') ?></label>
                     <?php $sexVal = $editing ? ($kittenToEdit['sex'] ?? 'unbekannt') : ($_POST['sex'] ?? 'unbekannt'); ?>
                     <div class="radio-group">
-                        <label><input type="radio" name="sex" value="kater" <?= $sexVal === 'kater' ? 'checked' : '' ?>> Kater</label>
-                        <label><input type="radio" name="sex" value="katze" <?= $sexVal === 'katze' ? 'checked' : '' ?>> Katze</label>
-                        <label><input type="radio" name="sex" value="unbekannt" <?= $sexVal === 'unbekannt' ? 'checked' : '' ?>> noch unbekannt</label>
+                        <label><input type="radio" name="sex" value="kater" <?= $sexVal === 'kater' ? 'checked' : '' ?>> <?= __('kittens.sex.male') ?></label>
+                        <label><input type="radio" name="sex" value="katze" <?= $sexVal === 'katze' ? 'checked' : '' ?>> <?= __('kittens.sex.female') ?></label>
+                        <label><input type="radio" name="sex" value="unbekannt" <?= $sexVal === 'unbekannt' ? 'checked' : '' ?>> <?= __('kittens.sex.unknown') ?></label>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="mother">Mutter</label>
+                        <label for="mother"><?= __('kittens.form.mother') ?></label>
                         <input type="text" id="mother" name="mother" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['mother'] ?? '') : ($_POST['mother'] ?? '')) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="found_location">Fundort</label>
+                        <label for="found_location"><?= __('kittens.form.found_location') ?></label>
                         <input type="text" id="found_location" name="found_location" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['found_location'] ?? '') : ($_POST['found_location'] ?? '')) ?>">
                     </div>
@@ -202,13 +202,13 @@ if (!empty($currentUser['custom_background'])) {
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="found_date">Funddatum</label>
+                        <label for="found_date"><?= __('kittens.form.found_date') ?></label>
                         <input type="date" id="found_date" name="found_date" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['found_date'] ?? '') : ($_POST['found_date'] ?? '')) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="postal_code">Postleitzahl</label>
+                        <label for="postal_code"><?= __('kittens.form.postal_code') ?></label>
                         <input type="text" id="postal_code" name="postal_code" maxlength="5" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['postal_code'] ?? '') : ($_POST['postal_code'] ?? '')) ?>">
                     </div>
@@ -216,25 +216,25 @@ if (!empty($currentUser['custom_background'])) {
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tasso_id">TASSO ID</label>
+                        <label for="tasso_id"><?= __('kittens.form.tasso_id') ?></label>
                         <input type="text" id="tasso_id" name="tasso_id" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['tasso_id'] ?? '') : ($_POST['tasso_id'] ?? '')) ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="ear_tattoo">Ohrtätowierung</label>
+                        <label for="ear_tattoo"><?= __('kittens.form.ear_tattoo') ?></label>
                         <input type="text" id="ear_tattoo" name="ear_tattoo" 
                                value="<?= htmlspecialchars($editing ? ($kittenToEdit['ear_tattoo'] ?? '') : ($_POST['ear_tattoo'] ?? '')) ?>">
                     </div>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" name="save_kitten" class="btn-primary"><?= $editing ? 'Änderungen speichern' : 'Kätzchen speichern' ?></button>
-                    <a href="dashboard.php" class="btn-secondary">Abbrechen</a>
+                    <button type="submit" name="save_kitten" class="btn-primary"><?= $editing ? __('kittens.actions.save_changes') : __('kittens.actions.save') ?></button>
+                    <a href="dashboard.php" class="btn-secondary"><?= __('common.cancel') ?></a>
                     <?php if ($editing): ?>
                         <?php $isArchived = !empty($kittenToEdit['is_archived']); ?>
                         <button type="button" class="btn-archive" onclick="toggleArchive(<?= (int)$kittenId ?>, <?= $isArchived ? 'true' : 'false' ?>)">
-                            <?= $isArchived ? 'Aus dem Archiv holen' : 'Archivieren' ?>
+                            <?= $isArchived ? __('kittens.actions.unarchive') : __('kittens.actions.archive') ?>
                         </button>
                         <button type="button" class="btn-danger" onclick="deleteKitten(<?= (int)$kittenId ?>)"><?= __('common.delete') ?></button>
                     <?php endif; ?>
@@ -245,7 +245,7 @@ if (!empty($currentUser['custom_background'])) {
 
     <script>
         function toggleArchive(kittenId, isCurrentlyArchived) {
-            const confirmMsg = isCurrentlyArchived ? 'Kätzchen aus dem Archiv holen?' : 'Kätzchen archivieren? Es erscheint dann nicht mehr im Dashboard.';
+            const confirmMsg = isCurrentlyArchived ? <?= json_encode(__('kittens.confirm.unarchive')) ?> : <?= json_encode(__('kittens.confirm.archive')) ?>;
             if (!confirm(confirmMsg)) return;
             fetch('ajax/toggle-archive.php', {
                 method: 'POST',
@@ -260,14 +260,14 @@ if (!empty($currentUser['custom_background'])) {
             }).catch(() => alert('<?= __('errors.update_generic') ?>'));
         }
         function deleteKitten(kittenId) {
-            if (!confirm('Dieses Kätzchen und alle zugehörigen Daten dauerhaft löschen?')) return;
+            if (!confirm(<?= json_encode(__('kittens.confirm.delete')) ?>)) return;
             fetch('ajax/delete-kitten.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ kitten_id: kittenId })
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    alert('Kätzchen gelöscht');
+                    alert(<?= json_encode(__('kittens.deleted')) ?>);
                     window.location.href = 'dashboard.php';
                 } else {
                     alert(data.message || '<?= __('common.delete') ?>');

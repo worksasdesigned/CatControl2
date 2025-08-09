@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+require_once __DIR__ . '/../config/i18n.php';
 require_once __DIR__ . '/../classes/User.php';
 require_once __DIR__ . '/../classes/Kitten.php';
 
@@ -11,7 +12,7 @@ $kittenService = new Kitten();
 
 if (!$userService->isLoggedIn()) {
     http_response_code(403);
-    echo '<p>Nicht autorisiert.</p>';
+    echo '<p>' . __('auth.not_logged_in') . '</p>';
     exit;
 }
 
@@ -19,7 +20,7 @@ $currentUser = $userService->getCurrentUser();
 $kittenId = isset($_REQUEST['kitten_id']) ? (int)$_REQUEST['kitten_id'] : 0;
 if (!$kittenId) {
     http_response_code(400);
-    echo '<p>Ungültige Anfrage.</p>';
+    echo '<p>' . __('errors.invalid_request') . '</p>';
     exit;
 }
 
@@ -60,30 +61,30 @@ $availableUsers = array_values(array_filter($allUsers, function($u) use ($shared
 }));
 ?>
 <div>
-    <h3>Mit Benutzer teilen</h3>
-    <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
-        <select id="shareUserSelect" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
-            <option value="">Benutzer wählen…</option>
-            <?php foreach ($availableUsers as $u): ?>
-                <option value="<?= (int)$u['id'] ?>"><?= htmlspecialchars($u['username']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <button onclick="shareWithSelected()" style="padding:8px 14px; border:none; border-radius:6px; background:#ff6b6b; color:#fff; cursor:pointer;">Hinzufügen</button>
-    </div>
+    <h3><?= __('share.title') ?></h3>
+<div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
+    <select id="shareUserSelect" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
+        <option value=""><?= __('share.select_user') ?></option>
+        <?php foreach ($availableUsers as $u): ?>
+            <option value="<?= (int)$u['id'] ?>"><?= htmlspecialchars($u['username']) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <button onclick="shareWithSelected()" style="padding:8px 14px; border:none; border-radius:6px; background:#ff6b6b; color:#fff; cursor:pointer;"><?= __('share.add') ?></button>
+</div>
 
-    <h3>Geteilte Benutzer</h3>
-    <?php if (empty($sharedUsers)): ?>
-        <p style="color:#666; font-style:italic;">Noch nicht geteilt.</p>
-    <?php else: ?>
-        <ul style="list-style:none; padding:0; margin:0;">
-            <?php foreach ($sharedUsers as $su): ?>
-                <li style="display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid #eee; border-radius:6px; margin-bottom:8px;">
-                    <span><?= htmlspecialchars($su['username']) ?> <span style="color:#999; font-size:12px;">(seit <?= htmlspecialchars(date('d.m.Y H:i', strtotime($su['granted_at']))) ?>)</span></span>
-                    <button onclick="unshareUser(<?= (int)$su['id'] ?>)" style="padding:6px 10px; border:none; border-radius:6px; background:#636e72; color:#fff; cursor:pointer;">Entfernen</button>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+<h3><?= __('share.shared_users') ?></h3>
+<?php if (empty($sharedUsers)): ?>
+    <p style="color:#666; font-style:italic;"><?= __('share.none') ?></p>
+<?php else: ?>
+    <ul style="list-style:none; padding:0; margin:0;">
+        <?php foreach ($sharedUsers as $su): ?>
+            <li style="display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid #eee; border-radius:6px; margin-bottom:8px;">
+                <span><?= htmlspecialchars($su['username']) ?> <span style="color:#999; font-size:12px;">(<?= __('share.since', ['datetime' => htmlspecialchars(date('d.m.Y H:i', strtotime($su['granted_at'])))]) ?>)</span></span>
+                <button onclick="unshareUser(<?= (int)$su['id'] ?>)" style="padding:6px 10px; border:none; border-radius:6px; background:#636e72; color:#fff; cursor:pointer;"><?= __('common.remove') ?></button>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
 </div>
 <script>
 function shareWithSelected() {
