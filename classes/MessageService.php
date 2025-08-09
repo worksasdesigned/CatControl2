@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/User.php';
-require_once __DIR__ . '/EmailService.php';
 
 class MessageService {
     private $db;
@@ -204,20 +203,8 @@ class MessageService {
                     $content .= "Tierarzt: " . $appointment['veterinarian_name'] . "\n";
                 }
                 
-                // Send internal message
+                // Interne Nachricht senden
                 $this->sendAppointmentReminder($appointment['owner_id'], $subject, $content);
-                
-                // Send email if SMTP configured
-                $emailService = new EmailService();
-                if (!empty($appointment['email'])) {
-                    $emailService->sendAppointmentReminder(
-                        $appointment['email'],
-                        $appointment['username'],
-                        $appointment['kitten_name'],
-                        $reminderType,
-                        $reminderDate
-                    );
-                }
                 
                 // Create reminder record
                 $insertSql = "INSERT INTO reminder_notifications (kitten_id, user_id, reminder_type, reminder_date) 
@@ -269,17 +256,6 @@ class MessageService {
                         }
                         
                         $this->sendAppointmentReminder($record['owner_id'], $subject, $content);
-                        // Email as well
-                        $emailService = new EmailService();
-                        if (!empty($record['email'])) {
-                            $emailService->sendAppointmentReminder(
-                                $record['email'],
-                                $record['username'],
-                                $record['kitten_name'],
-                                'deworming',
-                                $nextDate
-                            );
-                        }
                         $remindersCreated++;
                     }
                 }

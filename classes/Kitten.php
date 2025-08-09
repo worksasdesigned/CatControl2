@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__ . '/Database.php';
-require_once __DIR__ . '/EmailService.php';
 
 class Kitten {
     private $db;
@@ -207,15 +206,7 @@ class Kitten {
             $shareWithUser = $this->db->fetch("SELECT * FROM users WHERE id = ?", [$shareWithUserId]);
             $owner = $this->db->fetch("SELECT * FROM users WHERE id = ?", [$ownerId]);
             
-            if ($shareWithUser && $owner) {
-                $emailService = new EmailService();
-                $emailService->sendKittenShareNotification(
-                    $shareWithUser['email'],
-                    $shareWithUser['username'],
-                    $kitten['name'],
-                    $owner['username']
-                );
-            }
+            // E-Mail-Benachrichtigung entfernt
             
             return ['success' => true, 'message' => 'Kätzchen erfolgreich geteilt'];
         } catch (Exception $e) {

@@ -18,11 +18,8 @@ $success = '';
 // Handle registration form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
-    $country = trim($_POST['country'] ?? '');
-    $city = trim($_POST['city'] ?? '');
     $allowMessages = isset($_POST['allow_messages']);
     
     // Validation
@@ -32,10 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         $errors[] = 'Benutzername ist erforderlich';
     } elseif (strlen($username) < 3) {
         $errors[] = 'Benutzername muss mindestens 3 Zeichen lang sein';
-    }
-    
-    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Gültige E-Mail-Adresse ist erforderlich';
     }
     
     if (empty($password)) {
@@ -48,14 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         $errors[] = 'Passwörter stimmen nicht überein';
     }
     
-    if (empty($country)) {
-        $errors[] = 'Land ist erforderlich';
-    }
-    
     if (!empty($errors)) {
         $error = implode('<br>', $errors);
     } else {
-        $result = $userService->register($username, $email, $password, $country, $city, $allowMessages);
+        // E-Mail, Land und Stadt werden intern gesetzt
+        $result = $userService->register($username, null, $password, null, null, $allowMessages);
         
         if ($result['success']) {
             $success = $result['message'] . ' Sie können sich jetzt anmelden.';
@@ -264,11 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                 <input type="text" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
             </div>
             
-            <div class="form-group">
-                <label for="email">E-Mail-Adresse: <span class="required">*</span></label>
-                <input type="email" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
-            </div>
-            
             <div class="form-row">
                 <div class="form-group">
                     <label for="password"><?= __('login.password') ?>: <span class="required">*</span></label>
@@ -282,31 +267,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                 </div>
             </div>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="country">Land: <span class="required">*</span></label>
-                    <select id="country" name="country" required>
-                        <option value="">Bitte wählen...</option>
-                        <option value="Deutschland" <?= (($_POST['country'] ?? '') === 'Deutschland') ? 'selected' : '' ?>>Deutschland</option>
-                        <option value="Österreich" <?= (($_POST['country'] ?? '') === 'Österreich') ? 'selected' : '' ?>>Österreich</option>
-                        <option value="Schweiz" <?= (($_POST['country'] ?? '') === 'Schweiz') ? 'selected' : '' ?>>Schweiz</option>
-                        <option value="Niederlande" <?= (($_POST['country'] ?? '') === 'Niederlande') ? 'selected' : '' ?>>Niederlande</option>
-                        <option value="Belgien" <?= (($_POST['country'] ?? '') === 'Belgien') ? 'selected' : '' ?>>Belgien</option>
-                        <option value="Frankreich" <?= (($_POST['country'] ?? '') === 'Frankreich') ? 'selected' : '' ?>>Frankreich</option>
-                        <option value="Andere" <?= (($_POST['country'] ?? '') === 'Andere') ? 'selected' : '' ?>>Andere</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="city">Stadt (optional):</label>
-                    <input type="text" id="city" name="city" value="<?= htmlspecialchars($_POST['city'] ?? '') ?>">
-                </div>
-            </div>
-            
             <div class="checkbox-group">
                 <input type="checkbox" id="allow_messages" name="allow_messages" <?= isset($_POST['allow_messages']) ? 'checked' : 'checked' ?>>
-                <label for="allow_messages">Andere Benutzer dürfen mir Nachrichten schreiben<br>
-                <small>(Ihre E-Mail-Adresse wird nicht veröffentlicht!)</small></label>
+                <label for="allow_messages">Andere Benutzer dürfen mir Nachrichten schreiben</label>
             </div>
             
             <button type="submit" name="register" class="btn">Registrieren</button>

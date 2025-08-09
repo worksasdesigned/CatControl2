@@ -28,6 +28,7 @@ return [
     'login.back_to_login' => 'Zurück zur Anmeldung',
     'login.error.fill_all' => 'Bitte füllen Sie alle Felder aus',
     'login.forgot.email' => 'E-Mail-Adresse',
+    'login.forgot_hint' => 'Kein E-Mail-Reset mehr. Bitte rufen Sie die Seite reset-passwort.php auf, um Ihr Passwort mit Benutzername und Kätzchenname zurückzusetzen.',
     
     // Cookie
     'cookie.text' => 'Diese Website verwendet Cookies, um Ihnen die beste Erfahrung zu bieten. Durch die weitere Nutzung stimmen Sie der Verwendung von Cookies zu.',
@@ -73,6 +74,11 @@ return [
     'reset_password.new' => 'Neues Passwort',
     'reset_password.confirm' => 'Passwort bestätigen',
     'reset_password.change' => 'Passwort ändern',
+    'reset_password.username' => 'Benutzername',
+    'reset_password.kitten_name' => 'Name eines zugeordneten Kätzchens',
+    'reset_password.verify' => 'Prüfen und fortfahren',
+    'reset_password.set_new' => 'Neues Passwort setzen',
+    'reset_password.validation_failed' => 'Benutzer oder Kätzchenzuordnung nicht gefunden',
 
     // User related
     'user.register.username_taken' => 'Benutzername bereits vergeben',

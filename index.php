@@ -44,15 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = $result['message'];
             }
         }
-    } elseif (isset($_POST['forgot_password'])) {
-        $email = trim($_POST['email'] ?? '');
-        
-        if (empty($email)) {
-            $error = __('login.error.fill_all');
-        } else {
-            $result = $userService->requestPasswordReset($email);
-            $success = $result['message'];
-        }
     }
 }
 
@@ -301,16 +292,17 @@ if (isset($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === 'accepte
             <button type="submit" name="login" class="btn"><?= __('login.submit') ?></button>
         </form>
         
-        <!-- Forgot Password Form (Hidden by default) -->
-        <form method="post" id="forgotPasswordForm" class="forgot-password-form">
-            <div class="form-group">
-                <label for="email"><?= __('login.forgot.email') ?>:</label>
-                <input type="email" id="email" name="email" required>
+        <!-- Forgot Password Hint -->
+        <div id="forgotPasswordForm" class="forgot-password-form">
+            <div class="alert alert-success">
+                <?= __('login.forgot_hint') ?>
+                <br>
+                <a href="reset-passwort.php">reset-passwort.php</a>
             </div>
-            
-            <button type="submit" name="forgot_password" class="btn"><?= __('login.forgot_submit') ?></button>
-            <button type="button" class="btn btn-secondary" onclick="showLoginForm()"><?= __('login.back_to_login') ?></button>
-        </form>
+            <div class="links">
+                <button type="button" class="btn" onclick="showLoginForm()"><?= __('login.back_to_login') ?></button>
+            </div>
+        </div>
         
         <div class="links">
             <a href="#" onclick="showForgotPasswordForm()"><?= __('login.forgot') ?></a>
