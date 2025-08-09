@@ -1,7 +1,7 @@
 # 🐱 CatControl - Kätzchen Verwaltungssystem
 
 CatControl ist eine webbasierte Anwendung zur Verwaltung von jungen Kätzchen, entwickelt für den Einsatz Heimnetzwerken. Das System ermöglicht die Erfassung von Fütterungsdaten, Tierarztbesuchen, Gewichtsstatistiken und vielem mehr.
-Unterstütze Sprachen: Deutsch, Englisch, Französisch
+<br>Unterstütze Sprachen: Deutsch, Englisch, Französisch
 
 <img width="1720" height="864" alt="image" src="https://github.com/user-attachments/assets/a1471571-bc01-40f1-a54b-7b7426f16216" />
 
@@ -10,17 +10,17 @@ Die Daten können als Zip Datei exportiert werden.
 Gewichtszuname ist als Diagramm mit diversen Kennzahlen verfügbar.
 Kätzchen können auch anderen Benutzer freigegeben  oder (zur Ansicht) öffentlich zugänglich gemacht werden.
 
-<img width="821" height="1031" alt="image" src="https://github.com/user-attachments/assets/f6eab8d9-3c62-48c9-9772-848d97270066" />
+<img width="821" height="1031" alt="image" src="https://github.com/user-attachments/assets/f6eab8d9-3c62-48c9-9772-848d97270066" /><br>
 Erfasste Fütterungen können wieder gelöscht oder nachträglich abgeändert werden. Falls man manche Felder nicht pflegen /sehen will, kann man die Formularfelder auch individuell ausblenden.
 
 Die Bildergalerie ermöglicht es Bilder zum Kätzchen zu speichern.
-<img width="1077" height="941" alt="image" src="https://github.com/user-attachments/assets/58401cad-c595-44ed-96ee-21afdfe4a762" />
+<img width="1077" height="941" alt="image" src="https://github.com/user-attachments/assets/58401cad-c595-44ed-96ee-21afdfe4a762" /><br>
 
 Die Gewichtszuname wird als Diagramm dargestellt:
-<img width="1149" height="925" alt="image" src="https://github.com/user-attachments/assets/b4855902-082c-4c55-9cb7-ccd67e68de65" />
+<img width="1149" height="925" alt="image" src="https://github.com/user-attachments/assets/b4855902-082c-4c55-9cb7-ccd67e68de65" /><br>
 
 Es gibt sogar ein kleines Nachrichtensystem mit dem man zwischen den Benutzern einfache texte austauschen kann.
-<img width="1028" height="436" alt="image" src="https://github.com/user-attachments/assets/50ba2467-65d4-4001-bb8c-73ee631a982d" />
+<img width="1028" height="436" alt="image" src="https://github.com/user-attachments/assets/50ba2467-65d4-4001-bb8c-73ee631a982d" /><br>
 
 
 
