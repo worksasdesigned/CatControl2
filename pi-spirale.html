@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>π‑Spirale – Pi als CSS‑Spirale</title>
+  <style>
+    :root {
+      --bg-from: #0b1020;
+      --bg-to: #05070d;
+      --panel: #0f172a;
+      --panel-2: #111827;
+      --text: #e6edf6;
+      --muted: #9fb0c3;
+      --accent: #67e8f9;
+      --ring: #1f2937;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 20% -10%, #0b1634 0%, transparent 40%),
+                  radial-gradient(1000px 800px at 120% 120%, #0c2a29 0%, transparent 35%),
+                  linear-gradient(160deg, var(--bg-from), var(--bg-to));
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 20px;
+      align-items: start;
+      justify-items: center;
+      padding: 24px 18px 28px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      font-size: clamp(22px, 3vw, 28px);
+    }
+
+    .sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px 16px;
+      max-width: min(1024px, 94vw);
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: #0b1222;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      border-radius: 12px;
+      min-width: 260px;
+    }
+
+    .field label { color: var(--muted); font-size: 0.9rem; }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+      width: min(46vw, 360px);
+    }
+
+    input[type="number"] {
+      width: 96px;
+      background: #0b1222;
+      color: var(--text);
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, #22d3ee, #06b6d4);
+      color: #001017;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(34,211,238,.25);
+      transition: transform .08s ease, filter .2s ease;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .btn[disabled] { opacity: .65; cursor: progress; }
+
+    .btn-secondary {
+      background: #0b1222;
+      color: var(--text);
+      border: 1px solid #1f2937;
+      box-shadow: none;
+    }
+
+    .hint { color: var(--muted); font-size: .92rem; margin-top: 2px; }
+
+    .board {
+      display: grid;
+      place-items: center;
+      width: 100%;
+    }
+
+    .spiral-shell {
+      position: relative;
+      width: min(92vmin, 900px);
+      height: min(92vmin, 900px);
+      border-radius: 22px;
+      background:
+        radial-gradient(120% 120% at 35% 30%, rgba(255,255,255,0.06), rgba(255,255,255,0.0) 55%),
+        radial-gradient(150% 120% at 100% 110%, rgba(18,70,90,0.25), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0));
+      border: 1px solid #1f2937;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    #spiral {
+      position: absolute;
+      inset: 0;
+      contain: strict;
+      will-change: transform;
+    }
+
+    .digit {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+      display: grid;
+      place-items: center;
+      width: var(--size, 16px);
+      height: var(--size, 16px);
+      border-radius: 50%;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 1px rgba(0,0,0,.35);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.14),
+                  0 6px 12px rgba(0,0,0,.25),
+                  0 0 16px color-mix(in oklab, currentColor 50%, transparent);
+      user-select: none;
+    }
+
+    .digit.big {
+      z-index: 2;
+      filter: saturate(1.1) brightness(1.05);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 12px 24px rgba(0,0,0,.35), 0 0 22px color-mix(in oklab, currentColor 60%, transparent);
+    }
+
+    /* Farbcodierung pro Ziffer (0–9) */
+    [data-digit="0"] { background: hsl(0 82% 52%); color: #fff; }
+    [data-digit="1"] { background: hsl(24 90% 56%); color: #130a00; }
+    [data-digit="2"] { background: hsl(42 95% 58%); color: #1c1300; }
+    [data-digit="3"] { background: hsl(154 66% 45%); color: #00150e; }
+    [data-digit="4"] { background: hsl(197 65% 47%); color: #001419; }
+    [data-digit="5"] { background: hsl(261 74% 60%); color: #12002a; }
+    [data-digit="6"] { background: hsl(16 90% 55%); color: #180700; }
+    [data-digit="7"] { background: hsl(330 78% 62%); color: #2b001f; }
+    [data-digit="8"] { background: hsl(280 73% 60%); color: #1d0030; }
+    [data-digit="9"] { background: hsl(210 12% 60%); color: #0a0f14; }
+
+    .footer { color: var(--muted); font-size: .85rem; text-align: center; }
+
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid #0b1222; border-top-color: var(--accent);
+      display: inline-block; vertical-align: middle;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .legend {
+      position: absolute;
+      right: 10px; bottom: 10px;
+      display: grid; gap: 6px;
+      background: rgba(5,8,15,.32);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 8px 10px;
+      backdrop-filter: blur(6px);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .legend-row { display: grid; grid-template-columns: 14px auto; align-items: center; gap: 8px; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>π‑Spirale</h1>
+      <div class="sub">Berechne Pi und sieh die Ziffern als farbige Spirale</div>
+    </header>
+
+    <div class="controls" role="group" aria-label="Einstellungen">
+      <div class="field">
+        <label for="digits">Anzahl Ziffern</label>
+        <input id="digits" type="range" min="100" max="3000" step="50" value="1000" />
+        <output id="digitsOut">1000</output>
+      </div>
+      <div class="field">
+        <label for="size">Zifferngröße</label>
+        <input id="size" type="range" min="8" max="28" step="1" value="14" />
+        <output id="sizeOut">14 px</output>
+      </div>
+      <button id="startBtn" class="btn" type="button">Berechnen</button>
+      <button id="clearBtn" class="btn btn-secondary" type="button">Leeren</button>
+      <div class="hint" id="status"></div>
+    </div>
+
+    <div class="board">
+      <div class="spiral-shell">
+        <div id="spiral" aria-live="polite"></div>
+        <div class="legend" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="footer">Läuft komplett lokal im Browser. Keine Verbindungen zu externen Diensten.</div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const digitsRange = document.getElementById('digits');
+    const digitsOut = document.getElementById('digitsOut');
+    const sizeRange = document.getElementById('size');
+    const sizeOut = document.getElementById('sizeOut');
+    const startBtn = document.getElementById('startBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const spiral = document.getElementById('spiral');
+    const statusEl = document.getElementById('status');
+    const legend = document.querySelector('.legend');
+
+    digitsRange.addEventListener('input', () => {
+      digitsOut.textContent = digitsRange.value;
+      maybeAdjustDefaultSize();
+    });
+
+    sizeRange.addEventListener('input', () => {
+      sizeOut.textContent = `${sizeRange.value} px`;
+    });
+
+    function maybeAdjustDefaultSize() {
+      const n = Number(digitsRange.value);
+      let s = 18;
+      if (n <= 300) s = 22; else if (n <= 800) s = 16; else if (n <= 1500) s = 12; else s = 10;
+      sizeRange.value = s;
+      sizeOut.textContent = `${s} px`;
+    }
+    maybeAdjustDefaultSize();
+
+    startBtn.addEventListener('click', async () => {
+      const n = Number(digitsRange.value);
+      const dot = Number(sizeRange.value);
+      statusEl.innerHTML = `Berechne ${n.toLocaleString('de-DE')} Ziffern<span class="spinner"></span>`;
+      startBtn.disabled = true;
+
+      await new Promise(requestAnimationFrame);
+      const pi = computePiDigits(n + 1); // inklusive führender "3"
+      statusEl.textContent = 'Rendere Spirale…';
+
+      await new Promise(requestAnimationFrame);
+      renderSpiral(pi, dot);
+      startBtn.disabled = false;
+      statusEl.textContent = `Fertig: ${(pi.length - 1).toLocaleString('de-DE')} Ziffern`;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      spiral.replaceChildren();
+      statusEl.textContent = '';
+    });
+
+    function buildLegend() {
+      const colors = [
+        'hsl(0 82% 52%)',
+        'hsl(24 90% 56%)',
+        'hsl(42 95% 58%)',
+        'hsl(154 66% 45%)',
+        'hsl(197 65% 47%)',
+        'hsl(261 74% 60%)',
+        'hsl(16 90% 55%)',
+        'hsl(330 78% 62%)',
+        'hsl(280 73% 60%)',
+        'hsl(210 12% 60%)'
+      ];
+      legend.replaceChildren();
+      for (let d = 0; d <= 9; d++) {
+        const row = document.createElement('div');
+        row.className = 'legend-row';
+        const dot = document.createElement('div');
+        dot.className = 'legend-dot';
+        dot.style.background = colors[d];
+        const label = document.createElement('div');
+        label.textContent = `${d}`;
+        row.appendChild(dot);
+        row.appendChild(label);
+        legend.appendChild(row);
+      }
+    }
+    buildLegend();
+
+    function computePiDigits(digits) {
+      const len = Math.floor(digits * 10 / 3) + 1;
+      const r = new Array(len).fill(2);
+      let pi = '';
+      let carry = 0;
+      let nines = 0;
+      let predigit = 0;
+      for (let j = 0; j < digits; j++) {
+        carry = 0;
+        for (let i = len; i > 0; i--) {
+          const x = 10 * r[i - 1] + carry * i;
+          r[i - 1] = x % (2 * i - 1);
+          carry = Math.floor(x / (2 * i - 1));
+        }
+        r[0] = carry % 10;
+        const q = Math.floor(carry / 10);
+        if (q === 9) {
+          nines++;
+        } else if (q === 10) {
+          pi += String(predigit + 1);
+          while (nines > 0) { pi += '0'; nines--; }
+          predigit = 0;
+        } else {
+          pi += String(predigit);
+          predigit = q;
+          while (nines > 0) { pi += '9'; nines--; }
+        }
+      }
+      pi += String(predigit);
+      return pi; // beginnt mit "3"
+    }
+
+    function renderSpiral(piDigits, dotSizePx) {
+      const container = spiral;
+      container.replaceChildren();
+
+      const digitsStr = piDigits; // erste Stelle ist "3"
+      const count = digitsStr.length;
+
+      const rect = container.getBoundingClientRect();
+      const w = rect.width; const h = rect.height;
+      const cx = w / 2; const cy = h / 2;
+
+      const angleStep = 0.5; // Radiant pro Ziffer
+      const margin = 20;
+      const thetaMax = Math.max(1e-6, (count - 1) * angleStep);
+      const rMax = Math.min(w, h) / 2 - margin;
+      const k = rMax / thetaMax; // r = k * theta
+
+      const fragment = document.createDocumentFragment();
+
+      const size = Math.max(8, Math.min(28, dotSizePx|0));
+      const fontSize = Math.max(10, Math.min(22, Math.round(size * 0.72)));
+
+      for (let i = 0; i < count; i++) {
+        const ch = digitsStr[i];
+        if (ch === '.') continue;
+
+        const theta = i * angleStep;
+        const r = k * theta;
+        const x = cx + r * Math.cos(theta);
+        const y = cy + r * Math.sin(theta);
+        const dx = x - cx;
+        const dy = y - cy;
+        const rotateDeg = theta * 180 / Math.PI + 90;
+
+        const el = document.createElement('span');
+        el.className = 'digit' + (i === 0 ? ' big' : '');
+        el.dataset.digit = ch;
+        el.style.setProperty('--size', size + 'px');
+        el.style.fontSize = fontSize + 'px';
+        el.textContent = ch;
+        el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) rotate(${rotateDeg}deg)`;
+        fragment.appendChild(el);
+      }
+
+      container.appendChild(fragment);
+    }
+  </script>
+</body>
+</html>
