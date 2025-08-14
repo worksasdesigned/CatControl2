@@ -9,8 +9,8 @@ node_modules
 vendor
 
 # Runtime writable paths (mounted/persisted at runtime)
-#uploads
-#config
+uploads
+config
 
 # Misc
 *.log
