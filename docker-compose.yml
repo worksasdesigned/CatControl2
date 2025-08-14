@@ -1,23 +1,31 @@
 services:
   web:
     build: .
+    container_name: catcontrol_web
     ports:
       - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=catcontrol
+      - DB_USER=phpuser
+      - DB_PASSWORD=changeme123
+      - ADMIN_EMAIL=admin@localhost
+      - ALLOW_INSTALL=1
     volumes:
-      - ./config:/var/www/html/catcontrol/config
+      - ./uploads:/var/www/html/uploads
+      - ./config:/var/www/html/config
     depends_on:
       - db
-    environment:
-      - APACHE_DOCUMENT_ROOT=/var/www/html/catcontrol
 
   db:
-    image: mariadb:10.11
-    restart: always
+    image: mariadb:11.4
+    container_name: catcontrol_db
+    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=catcontrol
       - MYSQL_USER=phpuser
-      - MYSQL_PASSWORD=meinpasswort
-      - MYSQL_ROOT_PASSWORD=rootpasswort
+      - MYSQL_PASSWORD=changeme123
+      - MYSQL_ROOT_PASSWORD=rootpassword
     volumes:
       - db_data:/var/lib/mysql
 
