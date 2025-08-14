@@ -35,7 +35,7 @@ services:
       - ALLOW_INSTALL=1
       - APACHE_DOCUMENT_ROOT=/var/www/html
     ports:
-      - "8080:80"
+      - "8280:80"
     volumes:
       - uploads_data:/var/www/html/uploads
       - config_data:/var/www/html/config
