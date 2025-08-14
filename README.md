@@ -34,11 +34,19 @@ Hinweise:
   - Konfiguration (`config/database.php`): Volume `config_data`
 
 ## Alternative: Installation mit Portainer
-1. In Portainer anmelden und einen neuen Stack erstellen.
-2. Den Inhalt der Datei `docker-compose.yml` aus diesem Projekt in das Portainer-Editorfenster kopieren.
-3. Optional Umgebungsvariablen setzen (z. B. `DB_PASSWORD`).
-4. Stack deployen.
-5. Nach dem Start: `http://<Portainer-Host>:8080/install.php` im Browser aufrufen und die Installation ausführen.
+
+**Option A (empfohlen) – Repository**
+1. In Portainer einen neuen Stack erstellen und "Repository" wählen.
+2. Repository-URL: `https://github.com/worksasdesigned/CatControl2`
+3. Compose-Dateipfad: `docker-compose.yml`
+4. Branch/Reference: `Master`
+5. Optional: Umgebungsvariablen setzen (z. B. `DB_PASSWORD`).
+6. Deployen und danach `http://<Portainer-Host>:8080/install.php` im Browser öffnen.
+
+**Option B – Web-Editor (YAML einfügen)**
+- Der Web-Editor hat keinen Build-Kontext. Dadurch entsteht der Fehler "open Dockerfile: no such file or directory", wenn nur das YAML eingefügt wird.
+- Verwenden Sie stattdessen die Datei `docker-compose.portainer.yml` aus diesem Repo (sie nutzt einen Git-Build-Kontext). Inhalt in den Editor kopieren und deployen.
+- Falls der Build dennoch fehlschlägt, verwenden Sie Option A.
 
 ## Details zur Installation (install.php)
 - `install.php` erstellt (falls nötig) die Datenbanktabellen und speichert die DB-Verbindung in `config/database.php`.
