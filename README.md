@@ -1,6 +1,7 @@
 # CatControl – Docker Setup (Lokal/Heimnetz)
 
 Diese Anleitung setzt CatControl mit Docker (Apache + PHP + MariaDB) lokal im Heimnetz auf. Fokus: Es funktioniert zuverlässig, Security ist hier zweitrangig. CatControl ist für das lokale Netzwerk gedacht und nicht für das Internet.
+Am Ende der Doku findest du die Beschreibung wie du curl und docker installiertst.
 
 ## Komponenten und Ports
 - **Web (Apache + PHP 8.2)**: Port `8242` (Host) → `http://localhost:8242`
@@ -90,3 +91,58 @@ Folgende Daten werden dauerhaft gespeichert (Docker Volumes):
 
 ## Sicherheitshinweis
 CatControl ist für das **lokale Heimnetz** gedacht. Für den produktiven Internetbetrieb sind zusätzliche Maßnahmen notwendig (SSL/TLS, Härtung, Benutzer-/Rollen-/Backup-Konzept, regelmäßige Updates). Für den lokalen Einsatz genügt die hier gezeigte Konfiguration.
+
+## zB ein Debian vorbereiten
+1. System updaten & benötigte Pakete installieren
+
+Öffne ein Terminal und gib Folgendes ein:
+
+sudo apt update
+sudo apt install -y git curl
+
+
+Diese Befehle aktualisieren die Paketliste und installieren git und curl.
+
+2. Docker installieren
+a) Docker-Repository hinzufügen & installieren
+# APT-Transport und Zertifikate sicherstellen
+sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
+
+# GPG-Schlüssel für Docker hinzufügen
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Docker-Repository einrichten
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
+  https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Paketliste aktualisieren
+sudo apt update
+
+# Docker Engine installieren
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+
+b) Docker Compose (klassisch) installieren
+sudo apt install -y docker-compose
+
+
+Wenn die Debian-Version zu alt ist, kannst du Compose alternativ direkt über GitHub installieren – aber meist reicht das APT-Paket.
+
+Docker testen (optional)
+sudo docker run hello-world
+
+
+Wenn du die Bestätigung siehst, läuft Docker problemlos.
+
+3. Repository klonen und Docker-Setup vorbereiten
+
+Gehe in das Verzeichnis, in dem du das Projekt haben willst, und klone es:
+
+git clone https://github.com/worksasdesigned/CatControl2.git
+cd CatControl2
+
+
+Laut der README im Repository wird Docker Compose verwendet – dort sind die Komponenten definiert: Apache mit PHP-Server (inkl. PHP-Erweiterungen: pdo_mysql, gd, fileinfo), MariaDB als Datenbank und die Ports – Web unter 8242, DB unter 3308 
+GitHub
+.
