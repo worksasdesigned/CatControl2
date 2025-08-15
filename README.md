@@ -92,57 +92,40 @@ Folgende Daten werden dauerhaft gespeichert (Docker Volumes):
 ## Sicherheitshinweis
 CatControl ist für das **lokale Heimnetz** gedacht. Für den produktiven Internetbetrieb sind zusätzliche Maßnahmen notwendig (SSL/TLS, Härtung, Benutzer-/Rollen-/Backup-Konzept, regelmäßige Updates). Für den lokalen Einsatz genügt die hier gezeigte Konfiguration.
 
-## zB ein Debian vorbereiten
-1. System updaten & benötigte Pakete installieren
-
-Öffne ein Terminal und gib Folgendes ein:
-
-sudo apt update
-sudo apt install -y git curl
 
 
-Diese Befehle aktualisieren die Paketliste und installieren git und curl.
 
-2. Docker installieren
-a) Docker-Repository hinzufügen & installieren
-# APT-Transport und Zertifikate sicherstellen
-sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
 
-# GPG-Schlüssel für Docker hinzufügen
+## Installation unter Debian (für Anfänger) 
+
+Diese Anleitung beschreibt, wie man CatControl2 auf einem frischen Debian-System installiert und für die Docker-Ausführung vorbereitet.
+
+### 1. System aktualisieren & Grundpakete installieren
+
+`sudo apt update
+sudo apt install -y git curl apt-transport-https ca-certificates gnupg lsb-release
+
+Docker-Repository hinzufügen & installieren:
+
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-# Docker-Repository einrichten
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
-  https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
+https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+| sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Paketliste aktualisieren
 sudo apt update
-
-# Docker Engine installieren
-sudo apt install -y docker-ce docker-ce-cli containerd.io
-
-b) Docker Compose (klassisch) installieren
-sudo apt install -y docker-compose
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose `
 
 
-Wenn die Debian-Version zu alt ist, kannst du Compose alternativ direkt über GitHub installieren – aber meist reicht das APT-Paket.
+#Optional: Docker testen
 
-Docker testen (optional)
-sudo docker run hello-world
+`sudo docker run hello-world`
 
+3. Projekt herunterladen
+`git clone https://github.com/worksasdesigned/CatControl2.git`
+`cd CatControl2`
 
-Wenn du die Bestätigung siehst, läuft Docker problemlos.
+4. Container bauen & starten
+`docker compose up -d --build`
 
-3. Repository klonen und Docker-Setup vorbereiten
-
-Gehe in das Verzeichnis, in dem du das Projekt haben willst, und klone es:
-
-git clone https://github.com/worksasdesigned/CatControl2.git
-cd CatControl2
-
-
-Laut der README im Repository wird Docker Compose verwendet – dort sind die Komponenten definiert: Apache mit PHP-Server (inkl. PHP-Erweiterungen: pdo_mysql, gd, fileinfo), MariaDB als Datenbank und die Ports – Web unter 8242, DB unter 3308 
-GitHub
 .
