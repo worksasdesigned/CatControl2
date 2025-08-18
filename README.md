@@ -146,23 +146,13 @@ Diese Anleitung beschreibt, wie man CatControl2 auf einem frischen Debian-System
 `sudo apt update`
 `sudo apt install -y git curl apt-transport-https ca-certificates gnupg lsb-release`
 
-Docker-Repository hinzufügen & installieren:
-
-`curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg`
-
-`echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \`
-`https://download.docker.com/linux/debian $(lsb_release -cs) stable" \`
-`| sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
-
-`sudo apt update`
-`sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose `
-
+ChatGPT hilft dir sicher wie man docker installiert.
 
 #Optional: Docker testen
 
 `sudo docker run hello-world`
 
-3. Projekt herunterladen
+2. Projekt herunterladen
 `git clone https://github.com/worksasdesigned/CatControl2.git`
 `cd CatControl2`
 
