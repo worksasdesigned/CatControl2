@@ -2,6 +2,47 @@
 
 Diese Anleitung setzt CatControl mit Docker (Apache + PHP + MariaDB) lokal im Heimnetz auf. Fokus: Es funktioniert zuverlässig, Security ist hier zweitrangig. CatControl ist für das lokale Netzwerk gedacht und nicht für das Internet.
 Am Ende der Doku findest du die Beschreibung wie du curl und docker installiertst.
+Its available in german (main language), french and english.
+
+## Einfache Login Seite mit User Erzeugug
+<img width="528" height="503" alt="image" src="https://github.com/user-attachments/assets/3dcc68f0-02db-4f4b-abf6-780f978da2b9" />
+
+## Kätzchen Verwaltung
+<img width="1190" height="492" alt="image" src="https://github.com/user-attachments/assets/6304f084-9e89-4fa3-97db-96ba3c2f5928" />
+Es können neue Kätzchen angelegt, archiviert und für andere benutzer zur Pflege freigegeben werden.
+
+## Bilder
+<img width="997" height="867" alt="image" src="https://github.com/user-attachments/assets/7a432ad3-58d8-4cb9-8876-bef498bfcc47" />
+Zu jedem Kätzchen können Bilder hochgeladen werden. Ebenso ein Profilbild
+
+## Statistik
+<img width="1171" height="1256" alt="image" src="https://github.com/user-attachments/assets/65dcc578-e287-48ff-b987-bdf982e1f527" />
+Die erfassten Fütterungen (Gewichte) können als Statistik angezeigt werden.
+
+## Fütterungserfassung
+<img width="844" height="1128" alt="image" src="https://github.com/user-attachments/assets/8fde1016-a201-46a4-8f29-58fc7e731348" />
+
+Es können diverse Werte zur Fütterung erfasst werden. Wem das zu viel ist, kann jedes Feld für diesen Benutzer ausblenden und das Formular so auf das Wesentliche zusammenkürzen.
+Sämtliche erfassten Werte können unter dem Erfassungsformular geändert bzw gelöscht werden.
+
+## Tierarzt
+<img width="804" height="1125" alt="image" src="https://github.com/user-attachments/assets/cb0e0f56-b60b-46b3-bbb1-df8b3bfebf6f" />
+Es können die wesentlichen Informationen zu einem tierarzt besuch erfasst werden. Auch hier kann man wieder Tierarztbesuche löschen oder anpassen.
+
+## internes Mailsystem
+<img width="1063" height="455" alt="image" src="https://github.com/user-attachments/assets/de7de9a9-db31-4a34-b9fe-03288487cde4" />
+Es können kurze Nachrichten an andere Benutzer gesendet werden. Benutzer können aber auch geblockt werden.
+
+## Languages
+Deutsch, Französisch und Englisch können ausgewählt werden.
+<img width="196" height="432" alt="image" src="https://github.com/user-attachments/assets/b0d62a77-b9e9-4336-b7d7-bf9c79fd7128" />
+
+## Export:
+<img width="694" height="963" alt="image" src="https://github.com/user-attachments/assets/0de0db2e-a9fe-4fca-8b6b-b67b8cddf656" />
+Sämtliche Daten können als ZIP File export werden.
+
+
+
 
 ## Komponenten und Ports
 - **Web (Apache + PHP 8.2)**: Port `8242` (Host) → `http://localhost:8242`
