@@ -3,7 +3,7 @@ FROM php:8.2-apache
 # System dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libfreetype6-dev \
     libzip-dev \
     unzip \
