@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haus vom Nikolaus – Dynamische CSS-Zeichnung</title>
+  <style>
+    :root {
+      --stroke-color: #e74c3c;
+      --stroke-width: 6;
+      --total-duration: 5.5; /* Sekunden, Gesamtzeichendauer */
+      --bg: #0f172a;
+      --panel: #111827;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 70% -20%, #1f2937 0%, var(--bg) 45%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    .app {
+      width: 100%;
+      max-width: 820px;
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 600;
+      color: #0b1220;
+      background: linear-gradient(180deg, #34d399, #10b981);
+      box-shadow: 0 8px 20px rgba(16,185,129,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.03); }
+    .btn:active { transform: translateY(0); filter: brightness(0.98); }
+
+    .btn.secondary {
+      background: linear-gradient(180deg, #bfdbfe, #93c5fd);
+      box-shadow: 0 8px 20px rgba(147,197,253,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .control-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+    }
+
+    label { font-size: 12px; color: var(--muted); }
+
+    input[type="range"] {
+      width: 160px;
+      accent-color: var(--accent);
+    }
+
+    input[type="color"] {
+      width: 40px;
+      height: 28px;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .canvas {
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    svg {
+      width: min(88vw, 760px);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.35));
+    }
+
+    .hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* Zeichnungsstil */
+    .segment {
+      fill: none;
+      stroke: var(--stroke-color);
+      stroke-width: var(--stroke-width);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: var(--length);
+      stroke-dashoffset: var(--length);
+    }
+
+    .glow {
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.1)) drop-shadow(0 0 22px color-mix(in srgb, var(--stroke-color) 60%, transparent));
+    }
+
+    .animate .segment {
+      animation: draw var(--segment-duration)s var(--segment-delay)s linear forwards;
+    }
+
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel header">
+      <div class="title">Haus vom Nikolaus</div>
+      <div class="controls">
+        <button id="startBtn" class="btn">Start</button>
+        <button id="resetBtn" class="btn secondary">Reset</button>
+        <span class="control-group">
+          <label for="speed">Geschwindigkeit</label>
+          <input id="speed" type="range" min="2" max="14" step="0.5" value="5.5" />
+          <span id="speedVal" aria-hidden="true">5.5s</span>
+        </span>
+        <span class="control-group">
+          <label for="color">Farbe</label>
+          <input id="color" type="color" value="#e74c3c" />
+        </span>
+        <span class="control-group">
+          <label for="thickness">Linienstärke</label>
+          <input id="thickness" type="range" min="2" max="16" step="1" value="6" />
+          <span id="thicknessVal" aria-hidden="true">6px</span>
+        </span>
+      </div>
+    </section>
+
+    <section class="panel canvas">
+      <!-- Zeichenfläche: Das Haus wird aus 8 Segmenten aufgebaut -->
+      <svg id="house" class="glow" viewBox="0 0 500 500" aria-label="Dynamische Zeichnung des Haus vom Nikolaus" role="img">
+        <!-- Quadrat-Basis -->
+        <path class="segment" d="M 100 400 L 400 400" /> <!-- Boden -->
+        <path class="segment" d="M 400 400 L 400 200" /> <!-- Rechte Wand -->
+        <path class="segment" d="M 400 200 L 100 200" /> <!-- Oberkante Quadrat -->
+        <path class="segment" d="M 100 200 L 100 400" /> <!-- Linke Wand -->
+
+        <!-- Diagonalen im Quadrat -->
+        <path class="segment" d="M 100 400 L 400 200" /> <!-- Diagonal 1 -->
+        <path class="segment" d="M 400 400 L 100 200" /> <!-- Diagonal 2 -->
+
+        <!-- Dach -->
+        <path class="segment" d="M 100 200 L 250 50" /> <!-- Dach links -->
+        <path class="segment" d="M 250 50 L 400 200" /> <!-- Dach rechts -->
+      </svg>
+      <div class="hint">Klicke „Start“, um die CSS-Animation zu beginnen. Du kannst Geschwindigkeit, Farbe und Linienstärke anpassen.</div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const svg = document.getElementById('house');
+      const paths = Array.from(svg.querySelectorAll('.segment'));
+
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const speed = document.getElementById('speed');
+      const speedVal = document.getElementById('speedVal');
+      const color = document.getElementById('color');
+      const thickness = document.getElementById('thickness');
+      const thicknessVal = document.getElementById('thicknessVal');
+
+      function formatSeconds(s) {
+        return `${parseFloat(s).toFixed(1)}s`;
+      }
+
+      function initializeSegments(totalDurationSeconds) {
+        // Gesamtlänge bestimmen
+        const lengths = paths.map(p => p.getTotalLength());
+        const total = lengths.reduce((a, b) => a + b, 0);
+
+        // Dauer anteilig nach Segmentlänge, Verzögerungen kumulativ
+        let cumulativeDelay = 0;
+        paths.forEach((p, i) => {
+          const len = lengths[i];
+          const segmentDuration = (len / total) * totalDurationSeconds;
+
+          p.style.setProperty('--length', len.toString());
+          p.style.setProperty('--segment-duration', segmentDuration.toString());
+          p.style.setProperty('--segment-delay', cumulativeDelay.toString());
+
+          // Stroke-Dash zurücksetzen, damit ein Reset funktioniert
+          p.style.strokeDasharray = `${len}`;
+          p.style.strokeDashoffset = `${len}`;
+
+          cumulativeDelay += segmentDuration;
+        });
+      }
+
+      function restartAnimation() {
+        // Klasse entfernen und forcen Reflow, dann neu hinzufügen
+        svg.classList.remove('animate');
+        // eslint-disable-next-line no-unused-expressions
+        void svg.offsetWidth;
+        svg.classList.add('animate');
+      }
+
+      // Initiale Werte aus :root übernehmen
+      speedVal.textContent = formatSeconds(getComputedStyle(root).getPropertyValue('--total-duration') || speed.value);
+      thicknessVal.textContent = `${getComputedStyle(root).getPropertyValue('--stroke-width').trim() || thickness.value}px`;
+
+      // Erste Initialisierung
+      const initialDuration = parseFloat(getComputedStyle(root).getPropertyValue('--total-duration')) || parseFloat(speed.value);
+      initializeSegments(initialDuration);
+
+      // Controls
+      startBtn.addEventListener('click', () => {
+        restartAnimation();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        svg.classList.remove('animate');
+        const dur = parseFloat(speed.value);
+        initializeSegments(dur);
+      });
+
+      speed.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        root.style.setProperty('--total-duration', String(val));
+        speedVal.textContent = formatSeconds(val);
+        initializeSegments(val);
+        // Wenn aktuell animiert, neu starten, um die neue Geschwindigkeit anzuwenden
+        if (svg.classList.contains('animate')) {
+          restartAnimation();
+        }
+      });
+
+      color.addEventListener('input', (e) => {
+        root.style.setProperty('--stroke-color', e.target.value);
+      });
+
+      thickness.addEventListener('input', (e) => {
+        const px = parseInt(e.target.value, 10);
+        root.style.setProperty('--stroke-width', String(px));
+        thicknessVal.textContent = `${px}px`;
+      });
+
+      // Optional: Animation beim Laden schon einmal starten
+      // setTimeout(restartAnimation, 300);
+    })();
+  </script>
+</body>
+</html>
